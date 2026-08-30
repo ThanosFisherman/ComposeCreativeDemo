@@ -106,6 +106,7 @@ private class Ball(
     val speedModifier: Float,
     val hue: Float,
 ) {
+    val color: Color = Color.hsv(hue, 0.85f, 1f) // computed once — hue never changes after construction
     var angle = 0f
     var forward = true
     var pulse = 0f // 0..1, flashes on bounce and decays
@@ -164,20 +165,22 @@ private fun buildScene(size: Size, ballCount: Int): Scene {
 
 // ---------- Update (ported from the reference update() loop) ----------
 
-private fun updateBall(ball: Ball, dt: Float, onBounce: (Ball) -> Unit) {
+private fun updateBall(ball: Ball, index: Int, dt: Float, onBounce: (Int) -> Unit) {
     if (ball.forward) {
         ball.angle += dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
         if (ball.angle > 180f) {
             ball.angle = 180f - (ball.angle - 180f) // mirror back into range
             ball.forward = false
-            onBounce(ball)
+            ball.pulse = 1f
+            onBounce(index)
         }
     } else {
         ball.angle -= dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
         if (ball.angle < 0f) {
             ball.angle = -ball.angle // mirror back into range
             ball.forward = true
-            onBounce(ball)
+            ball.pulse = 1f
+            onBounce(index)
         }
     }
 
@@ -190,12 +193,18 @@ private fun updateBall(ball: Ball, dt: Float, onBounce: (Ball) -> Unit) {
 
 // ---------- Rendering ----------
 
+// Reused every frame instead of reallocated — these never change, so building them once is free.
+private val WALL_COLOR = Color.White.copy(alpha = 0.85f)
+private val CHAIN_LINE_COLOR = Color.White.copy(alpha = 0.7f)
+private const val BALL_STROKE_WIDTH = 2.2f
+private val BALL_STROKE = Stroke(width = BALL_STROKE_WIDTH)
+
 private fun DrawScope.drawBackground() {
     drawRect(color = Color.Black)
 }
 
 private fun DrawScope.drawWall(wall: Wall) {
-    drawLine(color = Color.White.copy(alpha = 0.85f), start = wall.p1, end = wall.p2, strokeWidth = 2f)
+    drawLine(color = WALL_COLOR, start = wall.p1, end = wall.p2, strokeWidth = 2f)
 }
 
 /** Connects consecutive balls' centers — since each ball moves independently, this segment's
@@ -203,7 +212,7 @@ private fun DrawScope.drawWall(wall: Wall) {
 private fun DrawScope.drawChainLines(balls: List<Ball>) {
     for (i in 0 until balls.size - 1) {
         drawLine(
-            color = Color.White.copy(alpha = 0.35f),
+            color = CHAIN_LINE_COLOR,
             start = balls[i].position,
             end = balls[i + 1].position,
             strokeWidth = 2f,
@@ -211,23 +220,28 @@ private fun DrawScope.drawChainLines(balls: List<Ball>) {
     }
 }
 
+/**
+ * Renders one ball with a ring-shaped glow: transparent center, transparent again right up
+ * to the stroke's inner edge, a colored band across the stroke, then fading back to
+ * transparent outside it. The Brush itself has to be rebuilt every frame — its shape depends
+ * on `radius`/`glowRadius` (which move with `ball.pulse`, almost never at rest two frames in
+ * a row while decaying) and `center` (which moves every frame, since the ball is always in
+ * motion) — so there's nothing safe to cache there without risking a visible mismatch.
+ * `ball.color` and the stroke are the only truly frame-invariant pieces, so those are hoisted
+ * out; everything else matches the original exactly.
+ */
 private fun DrawScope.drawBall(ball: Ball) {
-    val color = Color.hsv(ball.hue, 0.85f, 1f)
-    val strokeWidth = 2.2f
     val radius = PARTICLE_RADIUS * (1f + ball.pulse * 0.3f)
     val glowRadius = radius * (1.5f + ball.pulse * 0.8f)
-
-    val innerRadius = radius - strokeWidth / 2f
-    val outerRadius = radius + strokeWidth / 2f
+    val innerRadius = radius - BALL_STROKE_WIDTH / 2f
+    val outerRadius = radius + BALL_STROKE_WIDTH / 2f
 
     drawCircle(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
                 0f to Color.Transparent,
                 (innerRadius / glowRadius) to Color.Transparent,
-                (outerRadius / glowRadius) to color.copy(
-                    alpha = 0.55f + ball.pulse * 0.3f
-                ),
+                (outerRadius / glowRadius) to ball.color.copy(alpha = 0.55f + ball.pulse * 0.3f),
                 1f to Color.Transparent,
             ),
             center = ball.position,
@@ -237,12 +251,7 @@ private fun DrawScope.drawBall(ball: Ball) {
         center = ball.position,
     )
 
-    drawCircle(
-        color = color,
-        radius = radius,
-        center = ball.position,
-        style = Stroke(width = strokeWidth),
-    )
+    drawCircle(color = ball.color, radius = radius, center = ball.position, style = BALL_STROKE)
 }
 
 // ---------- Composable ----------
@@ -283,12 +292,7 @@ fun BouncingBallsInVGame(
 
                 scene?.let { s ->
                     if (dt > 0f) {
-                        s.balls.forEachIndexed { i, ball ->
-                            updateBall(ball, dt) {
-                                it.pulse = 1f
-                                onBounce(i) // hook a real "beep" sound up here if you like
-                            }
-                        }
+                        s.balls.forEachIndexed { i, ball -> updateBall(ball, i, dt, onBounce) }
                     }
                 }
 
