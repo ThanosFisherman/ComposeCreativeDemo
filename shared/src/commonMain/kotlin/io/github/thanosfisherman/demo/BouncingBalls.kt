@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.layout.onSizeChanged
 import kotlinx.coroutines.isActive
 import kotlin.math.PI
 import kotlin.math.max
@@ -36,19 +37,22 @@ import kotlin.math.sin
  * balls -> a shorter one. That's what makes "the walls" respond to
  * `ballCount` instead of always spanning a fixed chunk of the screen.
  *
- * Fixed virtual viewport (like libGDX's FitViewport): the whole scene is
- * always built at a constant VIRTUAL_WIDTH x VIRTUAL_HEIGHT, so its
- * proportions never change. At draw time we compute a single uniform scale
- * factor — min(actualWidth / VIRTUAL_WIDTH, actualHeight / VIRTUAL_HEIGHT)
- * — and a centering offset, then draw everything through that transform.
- * Resizing/maximizing the real window just changes how much letterboxing
- * (or pillarboxing) there is around the same-shaped scene; nothing in the
- * scene itself stretches.
+ * Fixed virtual viewport (like libGDX's FitViewport): the scene is always
+ * built at one of two constant sizes — VIRTUAL_SIZE_LANDSCAPE or
+ * VIRTUAL_SIZE_PORTRAIT, picked to match the device's current orientation —
+ * so its proportions never change while that orientation holds. At draw
+ * time we compute a single uniform scale factor — min(actualWidth /
+ * virtualWidth, actualHeight / virtualHeight) — and a centering offset,
+ * then draw everything through that transform. Resizing/maximizing the
+ * real window just changes how much letterboxing (or pillarboxing) there
+ * is around the same-shaped scene; nothing in the scene itself stretches.
+ * Rotating the device swaps which fixed size is in play and rebuilds the
+ * scene for it — that's the only time the scene's own shape changes.
  *
  * Structure:
  *  - Ball: pure kinematic state (angle, forward, per-ball tuning + bounds)
- *  - Scene: geometry (walls) + all balls, always built at VIRTUAL_WIDTH x VIRTUAL_HEIGHT
- *  - LaunchedEffect(ballCount): (re)builds the scene when ball count changes
+ *  - Scene: geometry (walls) + all balls, built at whichever virtual size matches orientation
+ *  - LaunchedEffect(ballCount, isPortrait): (re)builds the scene when ball count or orientation changes
  *  - LaunchedEffect(Unit): the game loop — withFrameNanos + delta time
  *  - Canvas: computes the fit-viewport transform from its own actual size
  *    each frame, then draws the scene through it. Reads `frameTick` to know
@@ -58,8 +62,13 @@ import kotlin.math.sin
  */
 
 // ---------- Virtual viewport ----------
-private const val VIRTUAL_WIDTH = 1280f
-private const val VIRTUAL_HEIGHT = 720f
+// Two fixed virtual sizes, one per orientation, so the fit-viewport scale isn't fighting a
+// mismatched aspect ratio. Using the landscape (wide) virtual size on a portrait phone is what
+// made the scene look tiny — width became the limiting term in the fit-scale calculation, so
+// almost all of the screen's height went unused as letterboxing. Each virtual size still keeps
+// its own shape constant regardless of the real window size, exactly as before.
+private val VIRTUAL_SIZE_LANDSCAPE = Size(1280f, 720f)
+private val VIRTUAL_SIZE_PORTRAIT = Size(720f, 1280f)
 
 // ---------- Tuning ----------
 private const val PARTICLE_RADIUS = 18f
@@ -262,12 +271,16 @@ fun BouncingBallsInVGame(
     ballCount: Int = 10,
     onBounce: (ballIndex: Int) -> Unit = {},
 ) {
+    var isPortrait by remember { mutableStateOf(false) }
     var scene by remember { mutableStateOf<Scene?>(null) }
     var frameTick by remember { mutableStateOf(0L) }
 
-    // Always built at the fixed virtual size, so it never depends on the actual window/layout size.
-    LaunchedEffect(ballCount) {
-        scene = buildScene(Size(VIRTUAL_WIDTH, VIRTUAL_HEIGHT), ballCount)
+    // Always built at a fixed virtual size, so it never depends on the actual window/layout
+    // size — but which fixed size depends on orientation, so it keeps rebuilding (only) when
+    // the device actually rotates between portrait and landscape, or ballCount changes.
+    LaunchedEffect(ballCount, isPortrait) {
+        val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
+        scene = buildScene(virtualSize, ballCount)
     }
 
     // The game loop: one step per display frame, advanced by measured delta time.
@@ -312,7 +325,11 @@ fun BouncingBallsInVGame(
         }
     }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
+    Canvas(
+        modifier = modifier
+            .fillMaxSize()
+            .onSizeChanged { isPortrait = it.height > it.width }
+    ) {
         // Reading frameTick subscribes this draw scope to it, so every increment
         // from the game loop above triggers a fresh draw at a steady rate.
         @Suppress("UNUSED_EXPRESSION")
@@ -323,10 +340,12 @@ fun BouncingBallsInVGame(
         val s = scene ?: return@Canvas
         if (size.width <= 0f || size.height <= 0f) return@Canvas
 
+        val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
+
         // Fit-viewport transform: one uniform scale (no stretch), centered — same idea as libGDX's FitViewport.
-        val fitScale = min(size.width / VIRTUAL_WIDTH, size.height / VIRTUAL_HEIGHT)
-        val offsetX = (size.width - VIRTUAL_WIDTH * fitScale) / 2f
-        val offsetY = (size.height - VIRTUAL_HEIGHT * fitScale) / 2f
+        val fitScale = min(size.width / virtualSize.width, size.height / virtualSize.height)
+        val offsetX = (size.width - virtualSize.width * fitScale) / 2f
+        val offsetY = (size.height - virtualSize.height * fitScale) / 2f
 
         translate(left = offsetX, top = offsetY) {
             scale(fitScale, fitScale, pivot = Offset.Zero) {
