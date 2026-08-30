@@ -10,10 +10,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import kotlinx.coroutines.isActive
 import kotlin.math.PI
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 /*
@@ -26,28 +28,53 @@ import kotlin.math.sin
  * row); vertical position is sin(angle) * amplitude, so each ball traces a
  * smooth arc between the two walls and back — no gravity, nothing falls in.
  *
- * A dense stack of balls (small vertical stagger between rows, decreasing
- * speed/amplitude by index) is what reads visually as one continuous curvy
- * "rope" rather than a physically-linked chain.
+ * The V's own geometry (how far down it starts, how tall it is) is derived
+ * from the ball rows rather than fixed: rows are spaced a constant
+ * ROW_SPACING apart starting at a constant fraction of the canvas height,
+ * so more balls -> a taller wedge that still hugs the rows closely, fewer
+ * balls -> a shorter one. That's what makes "the walls" respond to
+ * `ballCount` instead of always spanning a fixed chunk of the screen.
+ *
+ * Fixed virtual viewport (like libGDX's FitViewport): the whole scene is
+ * always built at a constant VIRTUAL_WIDTH x VIRTUAL_HEIGHT, so its
+ * proportions never change. At draw time we compute a single uniform scale
+ * factor — min(actualWidth / VIRTUAL_WIDTH, actualHeight / VIRTUAL_HEIGHT)
+ * — and a centering offset, then draw everything through that transform.
+ * Resizing/maximizing the real window just changes how much letterboxing
+ * (or pillarboxing) there is around the same-shaped scene; nothing in the
+ * scene itself stretches.
  *
  * Structure:
  *  - Ball: pure kinematic state (angle, forward, per-ball tuning + bounds)
- *  - Scene: geometry (walls) + all balls for the current canvas size
- *  - LaunchedEffect(canvasSize): (re)builds the scene when layout size is known/changes
+ *  - Scene: geometry (walls) + all balls, always built at VIRTUAL_WIDTH x VIRTUAL_HEIGHT
+ *  - LaunchedEffect(ballCount): (re)builds the scene when ball count changes
  *  - LaunchedEffect(Unit): the game loop — withFrameNanos + delta time
- *  - Canvas: pure rendering, reads `frameTick` to know when to redraw
+ *  - Canvas: computes the fit-viewport transform from its own actual size
+ *    each frame, then draws the scene through it. Reads `frameTick` to know
+ *    when to redraw.
  *
  * Tune the look via the constants below.
  */
 
+// ---------- Virtual viewport ----------
+private const val VIRTUAL_WIDTH = 1280f
+private const val VIRTUAL_HEIGHT = 720f
+
 // ---------- Tuning ----------
-private const val BALL_COUNT = 3
 private const val PARTICLE_RADIUS = 18f
-private const val ANGULAR_SPEED_DEG_PER_SEC = 90f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
+private const val ANGULAR_SPEED_DEG_PER_SEC = 180f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
 private const val SPEED_MODIFIER_MAX = 1f          // ball 0 (top row) sweeps fastest
 private const val SPEED_MODIFIER_MIN = 0.75f       // last ball (bottom row) sweeps slowest
 private const val MAX_DT = 1f / 30f                // clamp so a hitch doesn't blow up the sim
 private const val PULSE_DECAY_PER_SEC = 5f         // how fast the on-bounce flash fades
+
+private const val ROW_SPACING = 14f                // px between neighboring balls' rows — smaller = closer together
+private const val FIRST_ROW_Y_FRACTION = 0.5f      // how far down the canvas the first (top) row starts
+private const val ROW_TOP_MARGIN = 50f             // clearance between the first row and the wall's top edge
+private const val ROW_APEX_MARGIN = 90f            // clearance between the last row and the apex, so it still has width there
+private const val WALL_TOP_MIN_Y_FRACTION = 0.02f  // never let the wall's top edge go above this
+private const val WALL_APEX_MAX_Y_FRACTION = 0.97f // never let the apex go below this
+private const val WALL_HALF_WIDTH_FRACTION = 0.34f // how far topLeft/topRight sit from center, as a fraction of canvas width — smaller = pointier V
 
 // ---------- Geometry ----------
 
@@ -86,22 +113,31 @@ private class Ball(
 
 private class Scene(val walls: List<Wall>, val balls: List<Ball>)
 
-private fun buildScene(size: Size): Scene {
-    val apex = Offset(size.width / 2f, size.height * 0.92f)
-    val topLeft = Offset(size.width * 0.06f, size.height * 0.05f)
-    val topRight = Offset(size.width * 0.94f, size.height * 0.05f)
+private fun buildScene(size: Size, ballCount: Int): Scene {
+    val count = ballCount.coerceAtLeast(1)
+
+    // Rows are packed a constant ROW_SPACING apart starting at a constant fraction of
+    // the canvas height, so the vertical extent they occupy grows with `count`.
+    val firstRowY = size.height * FIRST_ROW_Y_FRACTION
+    val lastRowY = firstRowY + (count - 1) * ROW_SPACING
+
+    // The wall geometry hugs that extent, with a small margin on each end.
+    val topY = (firstRowY - ROW_TOP_MARGIN).coerceAtLeast(size.height * WALL_TOP_MIN_Y_FRACTION)
+    val apexY = (lastRowY + ROW_APEX_MARGIN).coerceAtMost(size.height * WALL_APEX_MAX_Y_FRACTION)
+
+    val apex = Offset(size.width / 2f, apexY)
+    val topLeft = Offset(size.width * (0.5f - WALL_HALF_WIDTH_FRACTION), topY)
+    val topRight = Offset(size.width * (0.5f + WALL_HALF_WIDTH_FRACTION), topY)
 
     val leftWall = Wall(apex, topLeft)
     val rightWall = Wall(apex, topRight)
 
-    val topRowY = size.height * 0.16f
-    val bottomRowY = size.height * 0.62f
     val ampMax = size.height * 0.11f
     val ampMin = size.height * 0.025f
 
-    val balls = List(BALL_COUNT) { i ->
-        val t = i / (BALL_COUNT - 1f)
-        val rowY = topRowY + (bottomRowY - topRowY) * t
+    val balls = List(count) { i ->
+        val t = if (count <= 1) 0f else i / (count - 1f)
+        val rowY = firstRowY + i * ROW_SPACING
 
         val leftBound = wallXAtY(leftWall, rowY) + PARTICLE_RADIUS
         val rightBound = wallXAtY(rightWall, rowY) - PARTICLE_RADIUS
@@ -113,7 +149,7 @@ private fun buildScene(size: Size): Scene {
             amplitude = ampMax - (ampMax - ampMin) * t,
             speedModifier = mapRange(
                 0f,
-                (BALL_COUNT - 1).coerceAtLeast(1).toFloat(),
+                (count - 1).coerceAtLeast(1).toFloat(),
                 SPEED_MODIFIER_MAX,
                 SPEED_MODIFIER_MIN,
                 i.toFloat()
@@ -161,6 +197,19 @@ private fun DrawScope.drawWall(wall: Wall) {
     drawLine(color = Color.White.copy(alpha = 0.85f), start = wall.p1, end = wall.p2, strokeWidth = 2f)
 }
 
+/** Connects consecutive balls' centers — since each ball moves independently, this segment's
+ *  length naturally contracts/expands frame to frame as the balls drift apart or together. */
+private fun DrawScope.drawChainLines(balls: List<Ball>) {
+    for (i in 0 until balls.size - 1) {
+        drawLine(
+            color = Color.White.copy(alpha = 0.35f),
+            start = balls[i].position,
+            end = balls[i + 1].position,
+            strokeWidth = 2f,
+        )
+    }
+}
+
 private fun DrawScope.drawBall(ball: Ball) {
     val color = Color.hsv(ball.hue, 0.85f, 1f)
     val strokeWidth = 2.2f
@@ -198,16 +247,17 @@ private fun DrawScope.drawBall(ball: Ball) {
 // ---------- Composable ----------
 
 @Composable
-fun BouncingBallsInVGame(modifier: Modifier = Modifier, onBounce: (ballIndex: Int) -> Unit = {}) {
-    var canvasSize by remember { mutableStateOf(Size.Zero) }
+fun BouncingBallsInVGame(
+    modifier: Modifier = Modifier,
+    ballCount: Int = 10,
+    onBounce: (ballIndex: Int) -> Unit = {},
+) {
     var scene by remember { mutableStateOf<Scene?>(null) }
     var frameTick by remember { mutableStateOf(0L) }
 
-    // (Re)build the V geometry + balls whenever the layout size becomes known / changes.
-    LaunchedEffect(canvasSize) {
-        if (canvasSize.width > 0f && canvasSize.height > 0f) {
-            scene = buildScene(canvasSize)
-        }
+    // Always built at the fixed virtual size, so it never depends on the actual window/layout size.
+    LaunchedEffect(ballCount) {
+        scene = buildScene(Size(VIRTUAL_WIDTH, VIRTUAL_HEIGHT), ballCount)
     }
 
     // The game loop: one step per display frame, advanced by measured delta time.
@@ -237,20 +287,29 @@ fun BouncingBallsInVGame(modifier: Modifier = Modifier, onBounce: (ballIndex: In
         }
     }
 
-    Canvas(
-        modifier = modifier
-            .fillMaxSize()
-            .onSizeChanged { canvasSize = Size(it.width.toFloat(), it.height.toFloat()) }
-    ) {
+    Canvas(modifier = modifier.fillMaxSize()) {
         // Reading frameTick subscribes this draw scope to it, so every increment
         // from the game loop above triggers a fresh draw at a steady rate.
         @Suppress("UNUSED_EXPRESSION")
         frameTick
 
-        drawBackground()
+        drawBackground() // fills the whole actual canvas — doubles as the viewport's letterbox/pillarbox color
+
         val s = scene ?: return@Canvas
-        s.walls.forEach { drawWall(it) }
-        s.balls.forEach { drawBall(it) }
+        if (size.width <= 0f || size.height <= 0f) return@Canvas
+
+        // Fit-viewport transform: one uniform scale (no stretch), centered — same idea as libGDX's FitViewport.
+        val fitScale = min(size.width / VIRTUAL_WIDTH, size.height / VIRTUAL_HEIGHT)
+        val offsetX = (size.width - VIRTUAL_WIDTH * fitScale) / 2f
+        val offsetY = (size.height - VIRTUAL_HEIGHT * fitScale) / 2f
+
+        translate(left = offsetX, top = offsetY) {
+            scale(fitScale, fitScale, pivot = Offset.Zero) {
+                s.walls.forEach { drawWall(it) }
+                drawChainLines(s.balls)
+                s.balls.forEach { drawBall(it) }
+            }
+        }
     }
 }
 
@@ -261,6 +320,7 @@ fun BouncingBallsInVGame(modifier: Modifier = Modifier, onBounce: (ballIndex: In
  * fun App() {
  *     BouncingBallsInVGame(
  *         modifier = Modifier.fillMaxSize(),
+ *         ballCount = 3,
  *         onBounce = { index -> /* play your beep sound for this ball's pitch */ },
  *     )
  * }
