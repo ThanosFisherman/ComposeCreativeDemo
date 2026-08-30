@@ -16,6 +16,7 @@ import kotlinx.coroutines.isActive
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /*
@@ -263,13 +264,21 @@ fun BouncingBallsInVGame(
     // The game loop: one step per display frame, advanced by measured delta time.
     LaunchedEffect(Unit) {
         var lastFrameTimeNanos = 0L
+
+        // FPS logging: accumulated over a rolling 1-second window using the *raw*
+        // (unclamped) frame delta — MAX_DT below is a physics safety clamp, not a
+        // measurement of what the display is actually doing.
+        var fpsAccumSeconds = 0f
+        var fpsFrameCount = 0
+
         while (isActive) {
             withFrameNanos { frameTimeNanos ->
-                val dt = if (lastFrameTimeNanos == 0L) {
+                val rawDt = if (lastFrameTimeNanos == 0L) {
                     0f
                 } else {
-                    ((frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f).coerceAtMost(MAX_DT)
+                    (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
                 }
+                val dt = rawDt.coerceAtMost(MAX_DT)
                 lastFrameTimeNanos = frameTimeNanos
 
                 scene?.let { s ->
@@ -282,6 +291,18 @@ fun BouncingBallsInVGame(
                         }
                     }
                 }
+
+                if (rawDt > 0f) {
+                    fpsAccumSeconds += rawDt
+                    fpsFrameCount++
+                    if (fpsAccumSeconds >= 1f) {
+                        val fps = fpsFrameCount / fpsAccumSeconds
+                        println("FPS: ${(fps * 10f).roundToInt() / 10f}")
+                        fpsAccumSeconds = 0f
+                        fpsFrameCount = 0
+                    }
+                }
+
                 frameTick++ // bump so the Canvas below knows to redraw
             }
         }
