@@ -14,6 +14,8 @@ fun main() = application {
         onCloseRequest = { exitApplication(); sound.dispose() },
         title = "demo",
     ) {
-        BouncingBallsInVGame(onBounce = { sound.play(id, 1f, 1f) })
+        BouncingBallsInVGame(onBounce = { freq ->
+            sound.play(id, 1f, freq)
+        })
     }
 }

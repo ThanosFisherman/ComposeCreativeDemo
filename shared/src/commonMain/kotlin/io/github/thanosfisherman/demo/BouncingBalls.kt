@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onSizeChanged
+import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import kotlinx.coroutines.isActive
 import kotlin.math.*
 
@@ -116,6 +117,7 @@ private class Ball(
     val amplitude: Float,
     val speedModifier: Float,
     val hue: Float,
+    val pitch: Float
 ) {
     val color: Color = Color.hsv(hue, 0.85f, 1f) // computed once — hue never changes after construction
     var angle = 0f
@@ -154,7 +156,8 @@ private fun buildScene(size: Size, ballCount: Int): Scene {
 
         val leftBound = wallXAtY(leftWall, rowY) + PARTICLE_RADIUS
         val rightBound = wallXAtY(rightWall, rowY) - PARTICLE_RADIUS
-
+        val notes = MusicIntervals.TRITONE_SCALE
+        val noteIndex = i % notes.size
         Ball(
             startingX = leftBound,
             finalX = rightBound,
@@ -168,6 +171,7 @@ private fun buildScene(size: Size, ballCount: Int): Scene {
                 i.toFloat()
             ),
             hue = t * 300f,
+            pitch = notes[noteIndex]
         )
     }
 
@@ -176,14 +180,14 @@ private fun buildScene(size: Size, ballCount: Int): Scene {
 
 // ---------- Update (ported from the reference update() loop) ----------
 
-private fun updateBall(ball: Ball, index: Int, dt: Float, onBounce: (Int) -> Unit) {
+private fun updateBall(ball: Ball, dt: Float, onBounce: (Float) -> Unit) {
     if (ball.forward) {
         ball.angle += dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
         if (ball.angle > 180f) {
             ball.angle = 180f - (ball.angle - 180f) // mirror back into range
             ball.forward = false
             ball.pulse = 1f
-            onBounce(index)
+            onBounce(ball.pitch)
         }
     } else {
         ball.angle -= dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
@@ -191,7 +195,7 @@ private fun updateBall(ball: Ball, index: Int, dt: Float, onBounce: (Int) -> Uni
             ball.angle = -ball.angle // mirror back into range
             ball.forward = true
             ball.pulse = 1f
-            onBounce(index)
+            onBounce(ball.pitch)
         }
     }
 
@@ -271,7 +275,7 @@ private fun DrawScope.drawBall(ball: Ball) {
 fun BouncingBallsInVGame(
     modifier: Modifier = Modifier,
     ballCount: Int = 10,
-    onBounce: (ballIndex: Int) -> Unit = {},
+    onBounce: (freq: Float) -> Unit = {},
 ) {
     var isPortrait by remember { mutableStateOf(false) }
     var scene by remember { mutableStateOf<Scene?>(null) }
@@ -307,7 +311,7 @@ fun BouncingBallsInVGame(
 
                 scene?.let { s ->
                     if (dt > 0f) {
-                        s.balls.forEachIndexed { i, ball -> updateBall(ball, i, dt, onBounce) }
+                        s.balls.forEachIndexed { i, ball -> updateBall(ball, dt, onBounce) }
                     }
                 }
 
