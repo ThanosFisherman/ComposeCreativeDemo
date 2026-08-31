@@ -156,7 +156,7 @@ private fun buildScene(size: Size, ballCount: Int): Scene {
 
         val leftBound = wallXAtY(leftWall, rowY) + PARTICLE_RADIUS
         val rightBound = wallXAtY(rightWall, rowY) - PARTICLE_RADIUS
-        val notes = MusicIntervals.TRITONE_SCALE
+        val notes = MusicIntervals.HIRAJOSHI_SCALE
         val noteIndex = i % notes.size
         Ball(
             startingX = leftBound,

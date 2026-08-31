@@ -75,6 +75,38 @@ object MusicIntervals {
         OCTAVE_ABOVE
     )
 
+    val DORIAN_SCALE: FloatArray = floatArrayOf(
+        OCTAVE_BELOW,
+        MINOR_SEVENTH_BELOW,
+        MAJOR_SIXTH_BELOW,
+        PERFECT_FIFTH_BELOW,
+        PERFECT_FOURTH_BELOW,
+        MINOR_THIRD_BELOW,
+        MAJOR_SECOND_BELOW,
+        UNISON,
+        MAJOR_SECOND,
+        MINOR_THIRD,
+        PERFECT_FOURTH,
+        PERFECT_FIFTH,
+        MAJOR_SIXTH,
+        MINOR_SEVENTH,
+        OCTAVE_ABOVE
+    )
+
+    val HIRAJOSHI_SCALE: FloatArray = floatArrayOf(
+        OCTAVE_BELOW,
+        MINOR_SEVENTH_BELOW,
+        MAJOR_SIXTH_BELOW,
+        PERFECT_FOURTH_BELOW,
+        MAJOR_THIRD_BELOW,
+        UNISON,
+        MAJOR_SECOND,
+        MINOR_THIRD,
+        PERFECT_FIFTH,
+        MINOR_SIXTH,
+        OCTAVE_ABOVE
+    )
+
     val MINOR_PENTATONIC_SCALE: FloatArray = floatArrayOf(
         OCTAVE_BELOW,
         MAJOR_SIXTH_BELOW,
