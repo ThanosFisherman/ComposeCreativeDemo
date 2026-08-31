@@ -85,6 +85,8 @@ private const val ROW_APEX_MARGIN = 90f            // clearance between the last
 private const val WALL_TOP_MIN_Y_FRACTION = 0.02f  // never let the wall's top edge go above this
 private const val WALL_APEX_MAX_Y_FRACTION = 0.97f // never let the apex go below this
 private const val WALL_HALF_WIDTH_FRACTION = 0.34f // how far topLeft/topRight sit from center, as a fraction of canvas width — smaller = pointier V
+private const val AMPLITUDE_MAX_FRACTION = 0.11f   // arc height (bow) for ball 0, as a fraction of canvas height — bigger = curvier
+private const val AMPLITUDE_MIN_FRACTION = 0.025f  // arc height for the last ball — bigger = curvier, and closer to AMPLITUDE_MAX_FRACTION = less taper across the row
 
 // ---------- Geometry ----------
 
@@ -143,8 +145,8 @@ private fun buildScene(size: Size, ballCount: Int): Scene {
     val leftWall = Wall(apex, topLeft)
     val rightWall = Wall(apex, topRight)
 
-    val ampMax = size.height * 0.11f
-    val ampMin = size.height * 0.025f
+    val ampMax = size.height * AMPLITUDE_MAX_FRACTION
+    val ampMin = size.height * AMPLITUDE_MIN_FRACTION
 
     val balls = List(count) { i ->
         val t = if (count <= 1) 0f else i / (count - 1f)
