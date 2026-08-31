@@ -14,11 +14,7 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onSizeChanged
 import kotlinx.coroutines.isActive
-import kotlin.math.PI
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
-import kotlin.math.sin
+import kotlin.math.*
 
 /*
  * Ported from a libGDX "beeping balls" update() loop: this is deliberately
@@ -81,12 +77,16 @@ private const val PULSE_DECAY_PER_SEC = 5f         // how fast the on-bounce fla
 private const val ROW_SPACING = 14f                // px between neighboring balls' rows — smaller = closer together
 private const val FIRST_ROW_Y_FRACTION = 0.5f      // how far down the canvas the first (top) row starts
 private const val ROW_TOP_MARGIN = 50f             // clearance between the first row and the wall's top edge
-private const val ROW_APEX_MARGIN = 90f            // clearance between the last row and the apex, so it still has width there
+private const val ROW_APEX_MARGIN =
+    90f            // clearance between the last row and the apex, so it still has width there
 private const val WALL_TOP_MIN_Y_FRACTION = 0.02f  // never let the wall's top edge go above this
 private const val WALL_APEX_MAX_Y_FRACTION = 0.97f // never let the apex go below this
-private const val WALL_HALF_WIDTH_FRACTION = 0.34f // how far topLeft/topRight sit from center, as a fraction of canvas width — smaller = pointier V
-private const val AMPLITUDE_MAX_FRACTION = 0.11f   // arc height (bow) for ball 0, as a fraction of canvas height — bigger = curvier
-private const val AMPLITUDE_MIN_FRACTION = 0.025f  // arc height for the last ball — bigger = curvier, and closer to AMPLITUDE_MAX_FRACTION = less taper across the row
+private const val WALL_HALF_WIDTH_FRACTION =
+    0.34f // how far topLeft/topRight sit from center, as a fraction of canvas width — smaller = pointier V
+private const val AMPLITUDE_MAX_FRACTION =
+    0.11f   // arc height (bow) for ball 0, as a fraction of canvas height — bigger = curvier
+private const val AMPLITUDE_MIN_FRACTION =
+    0.025f  // arc height for the last ball — bigger = curvier, and closer to AMPLITUDE_MAX_FRACTION = less taper across the row
 
 // ---------- Geometry ----------
 

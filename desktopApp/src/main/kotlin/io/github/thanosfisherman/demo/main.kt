@@ -1,15 +1,19 @@
 package io.github.thanosfisherman.demo
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import demo.shared.generated.resources.Res
+import io.github.thanosfisherman.demo.audioUtils.Sound
 
 fun main() = application {
+    val uri = Res.getUri("files/sounds/beep.wav")
+    val sound: Sound = SoundEngine()
+    sound.init()
+    val id = sound.loadSound(uri)
     Window(
-        onCloseRequest = { exitApplication() },
+        onCloseRequest = { exitApplication(); sound.dispose() },
         title = "demo",
     ) {
-        BouncingBallsInVGame()
+        BouncingBallsInVGame(onBounce = { sound.play(id, 1f, 1f) })
     }
 }
