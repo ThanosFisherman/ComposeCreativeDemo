@@ -67,8 +67,8 @@ import kotlin.math.sin
 // made the scene look tiny — width became the limiting term in the fit-scale calculation, so
 // almost all of the screen's height went unused as letterboxing. Each virtual size still keeps
 // its own shape constant regardless of the real window size, exactly as before.
-private val VIRTUAL_SIZE_LANDSCAPE = Size(1280f, 720f)
-private val VIRTUAL_SIZE_PORTRAIT = Size(720f, 1280f)
+private val VIRTUAL_SIZE_LANDSCAPE = Size(1024f, 480f)
+private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
 // ---------- Tuning ----------
 private const val PARTICLE_RADIUS = 18f
