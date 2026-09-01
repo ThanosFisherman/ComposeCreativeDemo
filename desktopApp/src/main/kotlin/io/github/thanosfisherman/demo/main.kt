@@ -6,7 +6,7 @@ import demo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Sound
 
 fun main() = application {
-    val uri = Res.getUri("files/sounds/Tone2.wav")
+    val uri = Res.getUri("files/sounds/Tone4.wav")
     val sound: Sound = SoundEngine()
     sound.init()
     val id = sound.loadSound(uri)

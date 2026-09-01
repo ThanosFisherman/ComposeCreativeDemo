@@ -69,7 +69,7 @@ private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
 // ---------- Tuning ----------
 private const val PARTICLE_RADIUS = 18f
-private const val ANGULAR_SPEED_DEG_PER_SEC = 180f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
+private const val ANGULAR_SPEED_DEG_PER_SEC = 90f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
 private const val SPEED_MODIFIER_MAX = 1f          // ball 0 (top row) sweeps fastest
 private const val SPEED_MODIFIER_MIN = 0.75f       // last ball (bottom row) sweeps slowest
 private const val MAX_DT = 1f / 30f                // clamp so a hitch doesn't blow up the sim
@@ -279,7 +279,7 @@ fun BouncingBallsInVGame(
 ) {
     var isPortrait by remember { mutableStateOf(false) }
     var scene by remember { mutableStateOf<Scene?>(null) }
-    var frameTick by remember { mutableStateOf(0L) }
+    var frameTick by remember { mutableStateOf(false) }
 
     // Always built at a fixed virtual size, so it never depends on the actual window/layout
     // size — but which fixed size depends on orientation, so it keeps rebuilding (only) when
@@ -325,8 +325,7 @@ fun BouncingBallsInVGame(
                         fpsFrameCount = 0
                     }
                 }
-
-                frameTick++ // bump so the Canvas below knows to redraw
+                frameTick = !frameTick // bump so the Canvas below knows to redraw
             }
         }
     }
