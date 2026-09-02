@@ -69,7 +69,7 @@ private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
 // ---------- Tuning ----------
 private const val PARTICLE_RADIUS = 18f
-private const val ANGULAR_SPEED_DEG_PER_SEC = 90f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
+private const val ANGULAR_SPEED_DEG_PER_SEC = 160f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
 private const val SPEED_MODIFIER_MAX = 1f          // ball 0 (top row) sweeps fastest
 private const val SPEED_MODIFIER_MIN = 0.75f       // last ball (bottom row) sweeps slowest
 private const val MAX_DT = 1f / 30f                // clamp so a hitch doesn't blow up the sim
@@ -156,7 +156,7 @@ private fun buildScene(size: Size, ballCount: Int): Scene {
 
         val leftBound = wallXAtY(leftWall, rowY) + PARTICLE_RADIUS
         val rightBound = wallXAtY(rightWall, rowY) - PARTICLE_RADIUS
-        val notes = MusicIntervals.HIRAJOSHI_SCALE
+        val notes = MusicIntervals.TRITONE_SCALE
         val noteIndex = i % notes.size
         Ball(
             startingX = leftBound,

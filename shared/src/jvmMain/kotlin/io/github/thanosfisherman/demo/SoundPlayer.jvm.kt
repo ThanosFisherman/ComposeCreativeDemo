@@ -13,7 +13,7 @@ import java.io.InputStream
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 
-class SoundEngine(sourcePoolSize: Int = 16) : Sound {
+class SoundPlayer(sourcePoolSize: Int = 16) : Sound {
 
     private var device: Long = 0
     private var context: Long = 0
@@ -64,8 +64,8 @@ class SoundEngine(sourcePoolSize: Int = 16) : Sound {
                 ).distinct()
 
                 val stream: InputStream = candidatePaths.firstNotNullOfOrNull { candidate ->
-                    SoundEngine::class.java.getResourceAsStream(if (candidate.startsWith("/")) candidate else "/$candidate")
-                        ?: SoundEngine::class.java.classLoader.getResourceAsStream(candidate.removePrefix("/"))
+                    SoundPlayer::class.java.getResourceAsStream(if (candidate.startsWith("/")) candidate else "/$candidate")
+                        ?: SoundPlayer::class.java.classLoader.getResourceAsStream(candidate.removePrefix("/"))
                         ?: Thread.currentThread().contextClassLoader.getResourceAsStream(candidate.removePrefix("/"))
                 } ?: throw FileNotFoundException("Could not find audio file or resource: $path")
 

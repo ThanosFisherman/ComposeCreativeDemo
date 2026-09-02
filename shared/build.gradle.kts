@@ -19,7 +19,7 @@ val lwjglNatives = Pair(
     System.getProperty("os.arch")!!
 ).let { (name, arch) ->
     when {
-        "FreeBSD".equals(name)                                    ->
+        "FreeBSD" == name ->
             "natives-freebsd"
         arrayOf("Linux", "SunOS", "Unix").any { name.startsWith(it) } ->
             if (arrayOf("arm", "aarch64").any { arch.startsWith(it) })
@@ -100,9 +100,10 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(dependencies.platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
-
             implementation("org.lwjgl:lwjgl")
             implementation("org.lwjgl:lwjgl-openal")
+            implementation("org.lwjgl:lwjgl-stb")
+            implementation("org.lwjgl:lwjgl-stb::$lwjglNatives")
             implementation("org.lwjgl:lwjgl::$lwjglNatives")
             implementation("org.lwjgl:lwjgl-openal::$lwjglNatives")
         }
