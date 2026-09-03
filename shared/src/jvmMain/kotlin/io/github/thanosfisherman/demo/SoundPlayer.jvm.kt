@@ -10,6 +10,7 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
+import java.net.URI
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 
@@ -46,32 +47,40 @@ class SoundPlayer(sourcePoolSize: Int = 16) : Sound {
         bufferCache[path]?.let { return it }
 
         val audioIn = run {
-            val file = File(path)
-            if (file.exists() && file.isFile) {
-                AudioSystem.getAudioInputStream(file)
+            val looksLikeUrl = path.contains("://") || path.startsWith("jar:") || path.startsWith("file:")
+            val stream: InputStream = if (looksLikeUrl) {
+                URI.create(path).toURL().openStream()
             } else {
-                val cleanPath = path.removePrefix("/")
-                val candidatePaths = listOf(
-                    path,
-                    cleanPath,
-                    "composeResources/demo.shared.generated.resources/$cleanPath",
-                    "composeResources/demo.shared.generated.resources/files/$cleanPath",
-                    "composeResources/demo.shared.generated.resources/files/sounds/${cleanPath.substringAfterLast('/')}",
-                    "composeResources/demo.shared.generated.resources/sounds/${cleanPath.substringAfterLast('/')}",
-                    "files/$cleanPath",
-                    "sounds/${cleanPath.substringAfterLast('/')}",
-                    cleanPath.substringAfterLast('/')
-                ).distinct()
+                val file = File(path)
+                if (file.exists() && file.isFile) {
+                    file.inputStream()
+                } else {
+                    val cleanPath = path.removePrefix("/")
+                    val candidatePaths = listOf(
+                        path,
+                        cleanPath,
+                        "composeResources/composecreativedemo.shared.generated.resources/$cleanPath",
+                        "composeResources/composecreativedemo.shared.generated.resources/files/$cleanPath",
+                        "composeResources/composecreativedemo.shared.generated.resources/files/sounds/${cleanPath.substringAfterLast('/')}",
+                        "composeResources/composecreativedemo.shared.generated.resources/sounds/${cleanPath.substringAfterLast('/')}",
+                        "composeResources/demo.shared.generated.resources/$cleanPath",
+                        "composeResources/demo.shared.generated.resources/files/$cleanPath",
+                        "composeResources/demo.shared.generated.resources/files/sounds/${cleanPath.substringAfterLast('/')}",
+                        "composeResources/demo.shared.generated.resources/sounds/${cleanPath.substringAfterLast('/')}",
+                        "files/$cleanPath",
+                        "sounds/${cleanPath.substringAfterLast('/')}",
+                        cleanPath.substringAfterLast('/')
+                    ).distinct()
 
-                val stream: InputStream = candidatePaths.firstNotNullOfOrNull { candidate ->
-                    SoundPlayer::class.java.getResourceAsStream(if (candidate.startsWith("/")) candidate else "/$candidate")
-                        ?: SoundPlayer::class.java.classLoader.getResourceAsStream(candidate.removePrefix("/"))
-                        ?: Thread.currentThread().contextClassLoader.getResourceAsStream(candidate.removePrefix("/"))
-                } ?: throw FileNotFoundException("Could not find audio file or resource: $path")
-
-                val bufferedStream = if (stream.markSupported()) stream else BufferedInputStream(stream)
-                AudioSystem.getAudioInputStream(bufferedStream)
+                    candidatePaths.firstNotNullOfOrNull { candidate ->
+                        SoundPlayer::class.java.getResourceAsStream(if (candidate.startsWith("/")) candidate else "/$candidate")
+                            ?: SoundPlayer::class.java.classLoader.getResourceAsStream(candidate.removePrefix("/"))
+                            ?: Thread.currentThread().contextClassLoader.getResourceAsStream(candidate.removePrefix("/"))
+                    } ?: throw FileNotFoundException("Could not find audio file or resource: $path")
+                }
             }
+            val bufferedStream = if (stream.markSupported()) stream else BufferedInputStream(stream)
+            AudioSystem.getAudioInputStream(bufferedStream)
         }
         val format: AudioFormat = audioIn.format
         val data = audioIn.readAllBytes()
