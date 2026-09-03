@@ -1,8 +1,10 @@
 package io.github.thanosfisherman.demo
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import demo.shared.generated.resources.Res
+import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
 
@@ -24,4 +26,10 @@ fun main() = application {
             sound.play(id, 0.38f, freq)
         })
     }
+}
+
+@Preview
+@Composable
+fun BouncingBallsInVGamePreview() {
+    BouncingBallsInVGame()
 }

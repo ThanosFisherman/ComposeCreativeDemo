@@ -361,16 +361,3 @@ fun BouncingBallsInVGame(
         }
     }
 }
-
-/*
- * Usage, anywhere in commonMain:
- *
- * @Composable
- * fun App() {
- *     BouncingBallsInVGame(
- *         modifier = Modifier.fillMaxSize(),
- *         ballCount = 3,
- *         onBounce = { index -> /* play your beep sound for this ball's pitch */ },
- *     )
- * }
- */
