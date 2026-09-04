@@ -321,13 +321,8 @@ fun BouncingBallsInVGame(
                             }
                             isAssigned = true
                         }
-                    } else if (timer > 15f) {
-                        if (!isAssigned)
-                            ANGULAR_SPEED_DEG_PER_SEC = 180f
-                    } else {
-                        if (!isAssigned)
-                            ANGULAR_SPEED_DEG_PER_SEC = 30f
                     }
+                    ANGULAR_SPEED_DEG_PER_SEC = if ((timer / 15f).toInt() % 2 == 0) 120f else 180f
                     s.balls.forEach { ball -> updateBall(ball, dt, onBounce) }
                 }
 

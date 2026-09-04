@@ -28,7 +28,7 @@ import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
 
 fun main() = application {
-    val uri = Res.getUri("files/sounds/Tone3.wav")
+    val uri = Res.getUri("files/sounds/Tone2.wav")
     val song = Res.getUri("files/music/Epic_Ballz_backing.ogg")
     val sound: Sound = SoundPlayer()
     val music: Music = MusicPlayer()
