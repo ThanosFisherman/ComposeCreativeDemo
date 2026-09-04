@@ -14,14 +14,18 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser()
+        browser {
+            commonWebpackConfig {
+                outputFileName = "shared.js"
+            }
+        }
         binaries.executable()
     }
 
     sourceSets {
         commonMain.dependencies {
             implementation(project(":shared"))
-
+            implementation(libs.compose.material3)
             implementation(libs.compose.ui)
         }
     }
