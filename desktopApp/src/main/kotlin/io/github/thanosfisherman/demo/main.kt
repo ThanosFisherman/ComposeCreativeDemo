@@ -1,6 +1,10 @@
 package io.github.thanosfisherman.demo
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -21,9 +25,15 @@ fun main() = application {
     Window(
         onCloseRequest = { exitApplication(); sound.dispose(); music.dispose() },
         title = "demo",
+        onKeyEvent = { event ->
+            if (event.key == Key.Escape && event.type == KeyEventType.KeyUp) {
+                exitApplication()
+                true
+            } else false
+        }
     ) {
-        BouncingBallsInVGame(ballCount = 16, onBounce = { freq ->
-            sound.play(id, 0.38f, freq)
+        BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
+            sound.play(id, 0.30f, freq)
         })
     }
 }

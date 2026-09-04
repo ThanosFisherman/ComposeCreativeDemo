@@ -85,11 +85,11 @@ class SoundPlayer(sourcePoolSize: Int = 16) : Sound {
         val format: AudioFormat = audioIn.format
         val data = audioIn.readAllBytes()
 
-        val alFormat = when {
-            format.channels == 1 && format.sampleSizeInBits == 8 -> AL_FORMAT_MONO8
-            format.channels == 1 && format.sampleSizeInBits == 16 -> AL_FORMAT_MONO16
-            format.channels == 2 && format.sampleSizeInBits == 8 -> AL_FORMAT_STEREO8
-            format.channels == 2 && format.sampleSizeInBits == 16 -> AL_FORMAT_STEREO16
+        val alFormat = when (format.channels) {
+            1 if format.sampleSizeInBits == 8 -> AL_FORMAT_MONO8
+            1 if format.sampleSizeInBits == 16 -> AL_FORMAT_MONO16
+            2 if format.sampleSizeInBits == 8 -> AL_FORMAT_STEREO8
+            2 if format.sampleSizeInBits == 16 -> AL_FORMAT_STEREO16
             else -> error("Unsupported audio format: $format")
         }
 

@@ -68,8 +68,8 @@ private val VIRTUAL_SIZE_LANDSCAPE = Size(1024f, 480f)
 private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
 // ---------- Tuning ----------
-private const val PARTICLE_RADIUS = 18f
-private const val ANGULAR_SPEED_DEG_PER_SEC = 160f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
+private const val PARTICLE_RADIUS = 12f
+var ANGULAR_SPEED_DEG_PER_SEC = 160f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
 private const val SPEED_MODIFIER_MAX = 1f          // ball 0 (top row) sweeps fastest
 private const val SPEED_MODIFIER_MIN = 0.75f       // last ball (bottom row) sweeps slowest
 private const val MAX_DT = 1f / 30f                // clamp so a hitch doesn't blow up the sim
@@ -83,11 +83,11 @@ private const val ROW_APEX_MARGIN =
 private const val WALL_TOP_MIN_Y_FRACTION = 0.02f  // never let the wall's top edge go above this
 private const val WALL_APEX_MAX_Y_FRACTION = 0.97f // never let the apex go below this
 private const val WALL_HALF_WIDTH_FRACTION =
-    0.34f // how far topLeft/topRight sit from center, as a fraction of canvas width — smaller = pointier V
+    0.44f // how far topLeft/topRight sit from center, as a fraction of canvas width — smaller = pointier V
 private const val AMPLITUDE_MAX_FRACTION =
-    0.11f   // arc height (bow) for ball 0, as a fraction of canvas height — bigger = curvier
+    0.21f   // arc height (bow) for ball 0, as a fraction of canvas height — bigger = curvier
 private const val AMPLITUDE_MIN_FRACTION =
-    0.025f  // arc height for the last ball — bigger = curvier, and closer to AMPLITUDE_MAX_FRACTION = less taper across the row
+    0.055f  // arc height for the last ball — bigger = curvier, and closer to AMPLITUDE_MAX_FRACTION = less taper across the row
 
 // ---------- Geometry ----------
 
@@ -117,7 +117,7 @@ private class Ball(
     val amplitude: Float,
     val speedModifier: Float,
     val hue: Float,
-    val pitch: Float
+    var pitch: Float
 ) {
     val color: Color = Color.hsv(hue, 0.85f, 1f) // computed once — hue never changes after construction
     var angle = 0f
@@ -280,6 +280,7 @@ fun BouncingBallsInVGame(
     var isPortrait by remember { mutableStateOf(false) }
     var scene by remember { mutableStateOf<Scene?>(null) }
     var frameTick by remember { mutableStateOf(false) }
+    var isAssigned by remember { mutableStateOf(false) }
 
     // Always built at a fixed virtual size, so it never depends on the actual window/layout
     // size — but which fixed size depends on orientation, so it keeps rebuilding (only) when
@@ -298,6 +299,7 @@ fun BouncingBallsInVGame(
         // measurement of what the display is actually doing.
         var fpsAccumSeconds = 0f
         var fpsFrameCount = 0
+        var timer = 0f
 
         while (isActive) {
             withFrameNanos { frameTimeNanos ->
@@ -310,9 +312,23 @@ fun BouncingBallsInVGame(
                 lastFrameTimeNanos = frameTimeNanos
 
                 scene?.let { s ->
-                    if (dt > 0f) {
-                        s.balls.forEachIndexed { i, ball -> updateBall(ball, dt, onBounce) }
+                    timer += dt
+                    if (timer > 60f) {
+                        if (!isAssigned) {
+                            s.balls.forEachIndexed { index, ball ->
+                                ball.pitch =
+                                    MusicIntervals.WHOLE_TONE_SCALE[index % MusicIntervals.WHOLE_TONE_SCALE.size]
+                            }
+                            isAssigned = true
+                        }
+                    } else if (timer > 15f) {
+                        if (!isAssigned)
+                            ANGULAR_SPEED_DEG_PER_SEC = 180f
+                    } else {
+                        if (!isAssigned)
+                            ANGULAR_SPEED_DEG_PER_SEC = 30f
                     }
+                    s.balls.forEach { ball -> updateBall(ball, dt, onBounce) }
                 }
 
                 if (rawDt > 0f) {
