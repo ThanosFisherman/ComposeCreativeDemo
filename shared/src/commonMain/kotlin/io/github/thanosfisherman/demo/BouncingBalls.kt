@@ -301,6 +301,10 @@ fun BouncingBallsInVGame(
         var fpsFrameCount = 0
         var timer = 0f
 
+        // Track the active state index so logic only triggers on changes
+        var currentScaleIndex = -1
+        var currentSpeedIndex = -1
+
         while (isActive) {
             withFrameNanos { frameTimeNanos ->
                 val rawDt = if (lastFrameTimeNanos == 0L) {
@@ -313,16 +317,36 @@ fun BouncingBallsInVGame(
 
                 scene?.let { s ->
                     timer += dt
-                    if (timer > 60f) {
-                        if (!isAssigned) {
-                            s.balls.forEachIndexed { index, ball ->
-                                ball.pitch =
-                                    MusicIntervals.WHOLE_TONE_SCALE[index % MusicIntervals.WHOLE_TONE_SCALE.size]
+                    // 1. Scale / Pitch updates (every 30 seconds)
+                    val scaleIndex = (timer / 30f).toInt() % 2
+                    if (scaleIndex != currentScaleIndex) {
+                        currentScaleIndex = scaleIndex
+                        val scale = when (scaleIndex) {
+                            0 -> {
+                                println("Tritone")
+                                MusicIntervals.TRITONE_SCALE
                             }
-                            isAssigned = true
+                            else -> {
+                                println("Whole Tone")
+                                MusicIntervals.WHOLE_TONE_SCALE
+                            }
+                        }
+                        s.balls.forEachIndexed { index, ball ->
+                            ball.pitch = scale[index % scale.size]
                         }
                     }
-                    ANGULAR_SPEED_DEG_PER_SEC = if ((timer / 15f).toInt() % 2 == 0) 120f else 180f
+
+                    // 2. Speed updates (every 15 seconds)
+                    val speedIndex = (timer / 15f).toInt() % 3
+                    if (speedIndex != currentSpeedIndex) {
+                        currentSpeedIndex = speedIndex
+                        ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
+                            0 -> 120f
+                            1 -> 180f
+                            else -> 90f
+                        }
+                    }
+
                     s.balls.forEach { ball -> updateBall(ball, dt, onBounce) }
                 }
 
