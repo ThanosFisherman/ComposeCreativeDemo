@@ -8,6 +8,7 @@ external class Howl constructor(options: JsAny) : JsAny {
     fun stop(id: Double = definedExternally): Howl
     fun volume(vol: Double = definedExternally, id: Double = definedExternally): JsAny
     fun rate(rate: Double = definedExternally, id: Double = definedExternally): JsAny
+    fun loop(loop: Boolean): JsAny
     fun loop(loop: Boolean = definedExternally, id: Double = definedExternally): JsAny
     fun playing(id: Double = definedExternally): Boolean
     fun unload()

@@ -14,12 +14,12 @@ class MusicPlayer : Music {
 
     override fun load(path: String) {
         stop()
-        howl = Howl(howlOptions(src = path, loop = false, volume = 1.0))
+        howl = Howl(howlOptions(src = path, loop = true, volume = 1.0))
     }
 
     override fun play(loop: Boolean, volume: Float) {
         val h = howl ?: error("No track loaded — call load() first")
-        h.loop(loop = loop)
+        h.loop(loop)
         h.volume(vol = volume.toDouble().coerceAtLeast(0.0))
         playId = h.play()
     }
