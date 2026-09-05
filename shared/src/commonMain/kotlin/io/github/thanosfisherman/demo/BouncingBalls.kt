@@ -1,8 +1,10 @@
 package io.github.thanosfisherman.demo
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -13,6 +15,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import kotlinx.coroutines.isActive
 import kotlin.math.*
@@ -213,6 +219,7 @@ private val WALL_COLOR = Color.White.copy(alpha = 0.85f)
 private val CHAIN_LINE_COLOR = Color.White.copy(alpha = 0.7f)
 private const val BALL_STROKE_WIDTH = 2.2f
 private val BALL_STROKE = Stroke(width = BALL_STROKE_WIDTH)
+private val DEBUG_TEXT_STYLE = TextStyle(color = Color.White, fontSize = 14.sp, fontFamily = FontFamily.Monospace)
 
 private fun DrawScope.drawBackground() {
     drawRect(color = Color.Black)
@@ -281,7 +288,8 @@ fun BouncingBallsInVGame(
     var scene by remember { mutableStateOf<Scene?>(null) }
     var frameTick by remember { mutableStateOf(false) }
     var isAssigned by remember { mutableStateOf(false) }
-
+    var fps by remember { mutableIntStateOf(0) } // updated once/sec — cheap to recompose on, unlike frameTick
+    var scaleLabel by remember { mutableStateOf("TRITONE SCALE") }
     // Always built at a fixed virtual size, so it never depends on the actual window/layout
     // size — but which fixed size depends on orientation, so it keeps rebuilding (only) when
     // the device actually rotates between portrait and landscape, or ballCount changes.
@@ -324,10 +332,13 @@ fun BouncingBallsInVGame(
                         val scale = when (scaleIndex) {
                             0 -> {
                                 println("Tritone")
+                                scaleLabel = "TRITONE SCALE"
                                 MusicIntervals.TRITONE_SCALE
                             }
+
                             else -> {
                                 println("Whole Tone")
+                                scaleLabel = "WHOLE TONE SCALE"
                                 MusicIntervals.WHOLE_TONE_SCALE
                             }
                         }
@@ -354,7 +365,8 @@ fun BouncingBallsInVGame(
                     fpsAccumSeconds += rawDt
                     fpsFrameCount++
                     if (fpsAccumSeconds >= 1f) {
-                        val fps = fpsFrameCount / fpsAccumSeconds
+                        val measuredFps = fpsFrameCount / fpsAccumSeconds
+                        fps = measuredFps.roundToInt()
                         println("FPS: ${(fps * 10f).roundToInt() / 10f}")
                         fpsAccumSeconds = 0f
                         fpsFrameCount = 0
@@ -365,34 +377,51 @@ fun BouncingBallsInVGame(
         }
     }
 
-    Canvas(
-        modifier = modifier
-            .fillMaxSize()
-            .onSizeChanged { isPortrait = it.height > it.width }
-    ) {
-        // Reading frameTick subscribes this draw scope to it, so every increment
-        // from the game loop above triggers a fresh draw at a steady rate.
-        @Suppress("UNUSED_EXPRESSION")
-        frameTick
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        drawBackground() // fills the whole actual canvas — doubles as the viewport's letterbox/pillarbox color
+        Canvas(
+            modifier = modifier
+                .fillMaxSize()
+                .onSizeChanged { isPortrait = it.height > it.width }
+        ) {
+            // Reading frameTick subscribes this draw scope to it, so every increment
+            // from the game loop above triggers a fresh draw at a steady rate.
+            @Suppress("UNUSED_EXPRESSION")
+            frameTick
 
-        val s = scene ?: return@Canvas
-        if (size.width <= 0f || size.height <= 0f) return@Canvas
+            drawBackground() // fills the whole actual canvas — doubles as the viewport's letterbox/pillarbox color
 
-        val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
+            val s = scene ?: return@Canvas
+            if (size.width <= 0f || size.height <= 0f) return@Canvas
 
-        // Fit-viewport transform: one uniform scale (no stretch), centered — same idea as libGDX's FitViewport.
-        val fitScale = min(size.width / virtualSize.width, size.height / virtualSize.height)
-        val offsetX = (size.width - virtualSize.width * fitScale) / 2f
-        val offsetY = (size.height - virtualSize.height * fitScale) / 2f
+            val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
 
-        translate(left = offsetX, top = offsetY) {
-            scale(fitScale, fitScale, pivot = Offset.Zero) {
-                s.walls.forEach { drawWall(it) }
-                drawChainLines(s.balls)
-                s.balls.forEach { drawBall(it) }
+            // Fit-viewport transform: one uniform scale (no stretch), centered — same idea as libGDX's FitViewport.
+            val fitScale = min(size.width / virtualSize.width, size.height / virtualSize.height)
+            val offsetX = (size.width - virtualSize.width * fitScale) / 2f
+            val offsetY = (size.height - virtualSize.height * fitScale) / 2f
+
+            translate(left = offsetX, top = offsetY) {
+                scale(fitScale, fitScale, pivot = Offset.Zero) {
+                    s.walls.forEach { drawWall(it) }
+                    drawChainLines(s.balls)
+                    s.balls.forEach { drawBall(it) }
+                }
             }
+        }
+
+        // Debug overlay — plain Compose text on top of the Canvas, not drawn via DrawScope,
+        // so it costs nothing extra on the per-frame render path (only "FPS" recomposes,
+        // and only once a second).
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .safeDrawingPadding()
+                .padding(8.dp)
+        ) {
+            BasicText(text = "Balls of Fury - Thanos Psaridis", style = DEBUG_TEXT_STYLE)
+            BasicText(text = "FPS: $fps", style = DEBUG_TEXT_STYLE)
+            BasicText(text = "Scale: $scaleLabel", style = DEBUG_TEXT_STYLE)
         }
     }
 }
