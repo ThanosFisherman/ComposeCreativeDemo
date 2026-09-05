@@ -1,9 +1,21 @@
 package io.github.thanosfisherman.demo
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -21,7 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import kotlinx.coroutines.isActive
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /*
  * Ported from a libGDX "beeping balls" update() loop: this is deliberately
@@ -79,7 +95,7 @@ var ANGULAR_SPEED_DEG_PER_SEC = 160f // matches the original: a full 0->180 swee
 private const val SPEED_MODIFIER_MAX = 1f          // ball 0 (top row) sweeps fastest
 private const val SPEED_MODIFIER_MIN = 0.75f       // last ball (bottom row) sweeps slowest
 private const val MAX_DT = 1f / 30f                // clamp so a hitch doesn't blow up the sim
-private const val PULSE_DECAY_PER_SEC = 5f         // how fast the on-bounce flash fades
+private const val PULSE_DECAY_PER_SEC = 3f         // how fast the on-bounce flash fades
 
 private const val ROW_SPACING = 14f                // px between neighboring balls' rows — smaller = closer together
 private const val FIRST_ROW_Y_FRACTION = 0.5f      // how far down the canvas the first (top) row starts
@@ -242,38 +258,45 @@ private fun DrawScope.drawChainLines(balls: List<Ball>) {
     }
 }
 
+private const val PULSE_FLASH_THRESHOLD = 0.02f // below this, treat the ball as "at rest" for rendering purposes
+
 /**
- * Renders one ball with a ring-shaped glow: transparent center, transparent again right up
- * to the stroke's inner edge, a colored band across the stroke, then fading back to
- * transparent outside it. The Brush itself has to be rebuilt every frame — its shape depends
- * on `radius`/`glowRadius` (which move with `ball.pulse`, almost never at rest two frames in
- * a row while decaying) and `center` (which moves every frame, since the ball is always in
- * motion) — so there's nothing safe to cache there without risking a visible mismatch.
- * `ball.color` and the stroke are the only truly frame-invariant pieces, so those are hoisted
- * out; everything else matches the original exactly.
+ * Renders one ball. The ring-shaped glow (transparent center, transparent up to the stroke's
+ * inner edge, a colored band across the stroke, fading back to transparent outside it) is
+ * the expensive part — a fresh Brush + colorStops array every time it's built — so it's only
+ * actually built during the brief post-bounce "flash" (pulse > PULSE_FLASH_THRESHOLD, roughly
+ * a dozen frames right after a bounce). The rest of the time — the vast majority of frames,
+ * since most balls are mid-swing rather than mid-bounce at any given moment — the glow is
+ * approximated with a couple of flat, alpha-stepped circles instead, which allocate nothing
+ * beyond the Color value itself. This trades a slightly less exact "resting" glow for a much
+ * lower steady-state allocation rate; the bounce flash itself (arguably the moment worth
+ * spending on) still looks exactly as before.
  */
 private fun DrawScope.drawBall(ball: Ball) {
     val radius = PARTICLE_RADIUS * (1f + ball.pulse * 0.3f)
-    val glowRadius = radius * (1.5f + ball.pulse * 0.8f)
-    val innerRadius = radius - BALL_STROKE_WIDTH / 2f
-    val outerRadius = radius + BALL_STROKE_WIDTH / 2f
 
-    drawCircle(
-        brush = Brush.radialGradient(
-            colorStops = arrayOf(
-                0f to Color.Transparent,
-                (innerRadius / glowRadius) to Color.Transparent,
-                (outerRadius / glowRadius) to ball.color.copy(alpha = 0.55f + ball.pulse * 0.3f),
-                1f to Color.Transparent,
+    if (ball.pulse > PULSE_FLASH_THRESHOLD) {
+        val glowRadius = radius * (1.5f + ball.pulse * 0.8f)
+        val innerRadius = radius - BALL_STROKE_WIDTH / 2f
+        val outerRadius = radius + BALL_STROKE_WIDTH / 2f
+
+        drawCircle(
+            brush = Brush.radialGradient(
+                colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    (innerRadius / glowRadius) to Color.Transparent,
+                    (outerRadius / glowRadius) to ball.color.copy(alpha = 0.55f + ball.pulse * 0.3f),
+                    1f to Color.Transparent,
+                ),
+                center = ball.position,
+                radius = glowRadius,
             ),
-            center = ball.position,
             radius = glowRadius,
-        ),
-        radius = glowRadius,
-        center = ball.position,
-    )
-
-    drawCircle(color = ball.color, radius = radius, center = ball.position, style = BALL_STROKE)
+            center = ball.position,
+        )
+    } else {
+        drawCircle(color = ball.color, radius = radius, center = ball.position, style = BALL_STROKE)
+    }
 }
 
 // ---------- Composable ----------
@@ -290,6 +313,8 @@ fun BouncingBallsInVGame(
     var isAssigned by remember { mutableStateOf(false) }
     var fps by remember { mutableIntStateOf(0) } // updated once/sec — cheap to recompose on, unlike frameTick
     var scaleLabel by remember { mutableStateOf("TRITONE SCALE") }
+    var ballSpeed by remember { mutableStateOf("") }
+    var dt by remember { mutableFloatStateOf(0f) }
     // Always built at a fixed virtual size, so it never depends on the actual window/layout
     // size — but which fixed size depends on orientation, so it keeps rebuilding (only) when
     // the device actually rotates between portrait and landscape, or ballCount changes.
@@ -320,7 +345,7 @@ fun BouncingBallsInVGame(
                 } else {
                     (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
                 }
-                val dt = rawDt.coerceAtMost(MAX_DT)
+                dt = rawDt.coerceAtMost(MAX_DT)
                 lastFrameTimeNanos = frameTimeNanos
 
                 scene?.let { s ->
@@ -352,13 +377,22 @@ fun BouncingBallsInVGame(
                     if (speedIndex != currentSpeedIndex) {
                         currentSpeedIndex = speedIndex
                         ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
-                            0 -> 120f
-                            1 -> 180f
-                            else -> 90f
+                            0 -> {
+                                ballSpeed = "MEDIUM"
+                                120f
+                            }
+
+                            1 -> {
+                                ballSpeed = "FAST"
+                                180f
+                            }
+
+                            else -> {
+                                ballSpeed = "SLOW"
+                                90f
+                            }
                         }
                     }
-
-                    s.balls.forEach { ball -> updateBall(ball, dt, onBounce) }
                 }
 
                 if (rawDt > 0f) {
@@ -403,9 +437,14 @@ fun BouncingBallsInVGame(
 
             translate(left = offsetX, top = offsetY) {
                 scale(fitScale, fitScale, pivot = Offset.Zero) {
+                    for (i in 0 until s.balls.size - 1) {
+                        updateBall(s.balls[i], dt, onBounce)
+                        drawBall(s.balls[i])
+                    }
+                    updateBall(s.balls[s.balls.size - 1], dt, onBounce)
+                    drawBall(s.balls[s.balls.size - 1])
                     s.walls.forEach { drawWall(it) }
                     drawChainLines(s.balls)
-                    s.balls.forEach { drawBall(it) }
                 }
             }
         }
@@ -413,6 +452,11 @@ fun BouncingBallsInVGame(
         // Debug overlay — plain Compose text on top of the Canvas, not drawn via DrawScope,
         // so it costs nothing extra on the per-frame render path (only "FPS" recomposes,
         // and only once a second).
+        //
+        // safeDrawingPadding() (instead of a flat 8.dp) is what keeps this clear of the status
+        // bar / cutouts on Android — Canvas draws full-bleed behind system bars, so without
+        // this the first line sits right under (or behind) the status bar. On Desktop/Web,
+        // where there's no such inset, this resolves to 0dp and behaves exactly like before.
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -422,6 +466,7 @@ fun BouncingBallsInVGame(
             BasicText(text = "Balls of Fury - Thanos Psaridis", style = DEBUG_TEXT_STYLE)
             BasicText(text = "FPS: $fps", style = DEBUG_TEXT_STYLE)
             BasicText(text = "Scale: $scaleLabel", style = DEBUG_TEXT_STYLE)
+            BasicText(text = "Ball speed: $ballSpeed", style = DEBUG_TEXT_STYLE)
         }
     }
 }

@@ -11,6 +11,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.net.URI
+import java.util.concurrent.Executors
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 
@@ -24,6 +25,9 @@ class SoundPlayer(sourcePoolSize: Int = 16) : Sound {
     // cache: file path -> AL buffer id
     private val bufferCache = HashMap<String, Int>()
 
+    private val playbackExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "SoundPlayer-playback").apply { isDaemon = true }
+    }
     override fun init() {
         val defaultDeviceName = ALC10.alcOpenDevice(null as CharSequence?)
         device = defaultDeviceName
@@ -112,23 +116,25 @@ class SoundPlayer(sourcePoolSize: Int = 16) : Sound {
      * @param pitch playback speed/pitch multiplier, 1.0 = normal
      */
     override fun play(bufferId: Int, volume: Float, pitch: Float) {
-        val source = sourcePool[nextSource]
-        nextSource = (nextSource + 1) % sourcePool.size
+        playbackExecutor.execute {
+            val source = sourcePool[nextSource]
+            nextSource = (nextSource + 1) % sourcePool.size
 
-        // Stop whatever this pooled source was doing before reuse
-        alSourceStop(source)
+            // Stop whatever this pooled source was doing before reuse
+            alSourceStop(source)
 
-        alSourcei(source, AL_BUFFER, bufferId)
-        alSourcef(source, AL_GAIN, volume.coerceAtLeast(0f))
-        alSourcef(source, AL_PITCH, pitch.coerceIn(0.01f, 4f)) // AL_PITCH must stay > 0
-        alSourcePlay(source)
+            alSourcei(source, AL_BUFFER, bufferId)
+            alSourcef(source, AL_GAIN, volume.coerceAtLeast(0f))
+            alSourcef(source, AL_PITCH, pitch.coerceIn(0.01f, 4f)) // AL_PITCH must stay > 0
+            alSourcePlay(source)
+        }
     }
 
     override fun dispose() {
         sourcePool.forEach { alDeleteSources(it) }
         bufferCache.values.forEach { alDeleteBuffers(it) }
         bufferCache.clear()
-
+        playbackExecutor.shutdown()
         ALC10.alcMakeContextCurrent(0)
         ALC10.alcDestroyContext(context)
         ALC10.alcCloseDevice(device)
