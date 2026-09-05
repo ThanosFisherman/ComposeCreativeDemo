@@ -331,13 +331,13 @@ fun BouncingBallsInVGame(
                         currentScaleIndex = scaleIndex
                         val scale = when (scaleIndex) {
                             0 -> {
-                                println("Tritone")
+                                //println("Tritone")
                                 scaleLabel = "TRITONE SCALE"
                                 MusicIntervals.TRITONE_SCALE
                             }
 
                             else -> {
-                                println("Whole Tone")
+                                // println("Whole Tone")
                                 scaleLabel = "WHOLE TONE SCALE"
                                 MusicIntervals.WHOLE_TONE_SCALE
                             }
@@ -367,7 +367,7 @@ fun BouncingBallsInVGame(
                     if (fpsAccumSeconds >= 1f) {
                         val measuredFps = fpsFrameCount / fpsAccumSeconds
                         fps = measuredFps.roundToInt()
-                        println("FPS: ${(fps * 10f).roundToInt() / 10f}")
+                        //println("FPS: ${(fps * 10f).roundToInt() / 10f}")
                         fpsAccumSeconds = 0f
                         fpsFrameCount = 0
                     }
