@@ -1,4 +1,4 @@
-# 🔥 Balls of Fury 🔥 🪩🪩🪩
+# 🔥 The Balls of Fury 🔥 🪩🪩🪩
 
 Try the WebAssembly version [here](https://thanosfisherman.github.io/ComposeCreativeDemo/).
 
