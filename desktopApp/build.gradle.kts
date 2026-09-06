@@ -7,6 +7,11 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
 tasks.register<org.gradle.jvm.tasks.Jar>("fatJarAllPlatforms") {
 
     description = "FatJarAllPlatforms"

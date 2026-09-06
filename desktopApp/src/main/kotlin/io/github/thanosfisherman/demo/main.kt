@@ -51,12 +51,12 @@ fun main() = application {
 
             if (!started) {
                 StartOverlay(onStart = {
-                    music.play(loop = true, volume = 0.8f)
+                    music.play(loop = true, volume = 0.7f)
                     started = true
                 })
             } else {
                 BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                    sound.play(id, 0.30f, freq)
+                    sound.play(id, 0.35f, freq)
                 })
             }
         }

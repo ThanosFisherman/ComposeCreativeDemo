@@ -45,7 +45,7 @@ fun main() {
             })
         } else {
             BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                sound.play(id, 0.30f, freq)
+                sound.play(id, 0.35f, freq)
             })
         }
     }

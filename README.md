@@ -1,43 +1,24 @@
-This is a Kotlin Multiplatform project targeting Android, Web, Desktop (JVM).
+# Balls of Fury
 
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications. It contains
-  several subfolders:
-    - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-    - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name. For
-      example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-      the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls. Similarly, if you want
-      to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-      folder is the appropriate location.
+Try the WebAssembly version [here]().
 
-### Running the apps
+## What it is
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and
-options:
+A little Kotlin Compose Multiplatform toy: a row of glowing balls trapped in a V-shaped wedge, sweeping back and forth and bouncing a beep off each wall.
 
-- Android app: `./gradlew :androidApp:assembleDebug`
-- Desktop app:
-    - Hot reload: `./gradlew :desktopApp:hotRun --auto`
-    - Standard run: `./gradlew :desktopApp:run`
-- Web app:
-    - Wasm target (faster, modern browsers): `./gradlew :webApp:wasmJsBrowserDevelopmentRun`
-    - JS target (slower, supports older browsers): `./gradlew :webApp:jsBrowserDevelopmentRun`
+Everything else in the scene grows out of that one idea:
 
-### Running tests
+- **The balls beep in tune to musical scales. In particular, they play notes from the Tritone and Whole Tone scales.**
+- **The background music is little piece I wrote myself to accomany the balls' beeps.**
+- **A fixed virtual viewport** (borrowed straight from libGDX's `FitViewport`) keeps the whole scene's proportions locked, whether you're rotating a phone into portrait or dragging a desktop window around.
+- **The ball count quietly ramps up** for the first 15 seconds, one ball at a time, so the wedge visibly grows on you before it settles.
+- **The musical scale and sweep speed cycle on a timer** — Tritone and Whole Tone scales trade off, tempo shifts between three speeds — so no two minutes of watching it sound quite the same.
+- **A debug overlay** (title, live FPS, current scale) rides on top, tucked safely past the status bar on Android.
+- **Real sound**, per bounce, with a genuine pitch multiplier — matching the exact `Sound.play(volume, pitch, pan)` convention the original libGDX code used, right down to `1f = default, >1f = higher, <1f = lower`.
+- It runs the same way — same code, same look — as an **Android APK, a cross-platform desktop fat JAR, and a Kotlin/Wasm web build.**
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+## Built with
 
-- Android tests: `./gradlew :shared:testAndroidHostTest`
-- Desktop tests: `./gradlew :shared:jvmTest`
-- Web tests:
-    - Wasm target: `./gradlew :shared:wasmJsTest`
-    - JS target: `./gradlew :shared:jsTest`
+Kotlin Multiplatform, Compose Multiplatform's Canvas API, a hand-rolled `withFrameNanos` + delta-time game loop, and entirely too much trial and error with the math stuff.
 
----
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
-
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack
-channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web). If you face any issues, please report them
-on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+## Screenshot
