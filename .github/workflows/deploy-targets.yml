@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    tags: ['v*'] # e.g. v1.0.0 — this is now the ONLY thing that triggers the workflow
+    tags: ['balls*'] # e.g. balls1.0.0 — this is now the ONLY thing that triggers the workflow
   workflow_dispatch: # optional manual trigger from the Actions tab — see note below if you want this gone too
 
 # pages/id-token are only needed by the Wasm deploy job — every other job overrides this
