@@ -3,6 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches: [master]
+    tags: ['v*']      # e.g. v1.0.0 — pushing a tag matching this triggers the Releases job below
   workflow_dispatch: # lets you trigger a run manually from the Actions tab, without a push
 
 # pages/id-token are only needed by the Wasm deploy job — the desktop/Android jobs
@@ -19,7 +20,10 @@ concurrency:
 
 jobs:
   # ---------- Web (Wasm) -> GitHub Pages ----------
+  # Only runs on pushes to main, not on tag pushes — tagging a release doesn't need to
+  # redeploy the same web app again.
   build-wasm:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -47,6 +51,7 @@ jobs:
 
   deploy-wasm:
     needs: build-wasm
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -57,6 +62,8 @@ jobs:
         uses: actions/deploy-pages@v4
 
   # ---------- Desktop -> cross-platform fat jar ----------
+  # Runs on every trigger (main pushes, tag pushes, manual dispatch) — cheap enough that
+  # having it available as a workflow artifact on ordinary pushes too doesn't hurt.
   build-desktop-jar:
     runs-on: ubuntu-latest
     permissions:
@@ -113,3 +120,31 @@ jobs:
           name: android-debug-apk
           path: androidApp/build/outputs/apk/debug/*.apk
           retention-days: 30
+
+  # ---------- Tag push -> attach both builds to a GitHub Release ----------
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-desktop-jar, build-android-apk]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # required to create a Release and upload assets to it
+    steps:
+      - name: Download desktop jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: desktop-fat-jar
+          path: artifacts/desktop
+
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-debug-apk
+          path: artifacts/android
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/desktop/*.jar
+            artifacts/android/*.apk
