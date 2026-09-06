@@ -1,6 +1,6 @@
-# Balls of Fury
+# 🔥 Balls of Fury 🔥 🪩🪩🪩
 
-Try the WebAssembly version [here]().
+Try the WebAssembly version [here](https://thanosfisherman.github.io/ComposeCreativeDemo/).
 
 ## What it is
 
