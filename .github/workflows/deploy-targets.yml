@@ -2,12 +2,11 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [master]
-    tags: ['v*']      # e.g. v1.0.0 — pushing a tag matching this triggers the Releases job below
-  workflow_dispatch: # lets you trigger a run manually from the Actions tab, without a push
+    tags: ['v*'] # e.g. v1.0.0 — this is now the ONLY thing that triggers the workflow
+  workflow_dispatch: # optional manual trigger from the Actions tab — see note below if you want this gone too
 
-# pages/id-token are only needed by the Wasm deploy job — the desktop/Android jobs
-# override this down to just "contents: read" for themselves, below.
+# pages/id-token are only needed by the Wasm deploy job — every other job overrides this
+# down to just what it actually needs, below.
 permissions:
   contents: read
   pages: write
@@ -20,10 +19,9 @@ concurrency:
 
 jobs:
   # ---------- Web (Wasm) -> GitHub Pages ----------
-  # Only runs on pushes to main, not on tag pushes — tagging a release doesn't need to
-  # redeploy the same web app again.
+  # Runs whenever the workflow runs at all — now that the only push trigger left is tags,
+  # this deploys the tagged version to Pages.
   build-wasm:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -51,7 +49,6 @@ jobs:
 
   deploy-wasm:
     needs: build-wasm
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -62,8 +59,6 @@ jobs:
         uses: actions/deploy-pages@v4
 
   # ---------- Desktop -> cross-platform fat jar ----------
-  # Runs on every trigger (main pushes, tag pushes, manual dispatch) — cheap enough that
-  # having it available as a workflow artifact on ordinary pushes too doesn't hurt.
   build-desktop-jar:
     runs-on: ubuntu-latest
     permissions:
