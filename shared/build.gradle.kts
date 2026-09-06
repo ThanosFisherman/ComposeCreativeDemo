@@ -84,14 +84,14 @@ kotlin {
             implementation(libs.wrappers.browser)
         }
         jvmMain.dependencies {
-            implementation(dependencies.platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
-            implementation("org.lwjgl:lwjgl")
-            implementation("org.lwjgl:lwjgl-openal")
-            implementation("org.lwjgl:lwjgl-stb")
+            api(dependencies.platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
+            api("org.lwjgl:lwjgl")
+            api("org.lwjgl:lwjgl-openal")
+            api("org.lwjgl:lwjgl-stb")
             lwjglNatives.forEach { native ->
-                implementation("org.lwjgl:lwjgl::$native")
-                implementation("org.lwjgl:lwjgl-openal::$native")
-                implementation("org.lwjgl:lwjgl-stb::$native")
+                api("org.lwjgl:lwjgl::$native")
+                api("org.lwjgl:lwjgl-openal::$native")
+                api("org.lwjgl:lwjgl-stb::$native")
             }
         }
     }
