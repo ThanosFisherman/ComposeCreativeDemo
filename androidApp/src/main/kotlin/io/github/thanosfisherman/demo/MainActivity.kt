@@ -95,14 +95,14 @@ fun StartOverlay(onStart: () -> Unit) {
             shape = RoundedCornerShape(50),
             elevation = ButtonDefaults.buttonElevation(
                 defaultElevation = 6.dp,
-                pressedElevation = 2.dp
+                pressedElevation = 4.dp
             ),
-            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+            contentPadding = PaddingValues(horizontal = 48.dp, vertical = 24.dp)
         ) {
             Text(
                 color = Color.White,
                 text = "Click to Start",
-                fontSize = 18.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.5.sp
             )
