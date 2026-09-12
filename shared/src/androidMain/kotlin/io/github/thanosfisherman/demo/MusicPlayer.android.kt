@@ -17,7 +17,7 @@ class MusicPlayer(private val context: Context) : Music {
      * @param path a Compose Multiplatform resource URI from Res.getUri(...)
      */
     override fun load(path: String) {
-        stop()
+        dispose()
 
         val afd = context.assets.openFd(toAssetPath(path))
         mediaPlayer = MediaPlayer().apply {
@@ -58,13 +58,16 @@ class MusicPlayer(private val context: Context) : Music {
 
     override fun stop() {
         mediaPlayer?.apply {
+            if (isPlaying) pause()
+            seekTo(0)
+        }
+    }
+
+    override fun dispose() {
+        mediaPlayer?.apply {
             if (isPlaying) stop()
             release()
         }
         mediaPlayer = null
-    }
-
-    override fun dispose() {
-        stop()
     }
 }

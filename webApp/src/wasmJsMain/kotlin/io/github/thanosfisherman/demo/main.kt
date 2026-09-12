@@ -27,32 +27,49 @@ import org.w3c.dom.events.Event
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
 
-    val uri = Res.getUri("files/sounds/Tone2.wav")
-    val song = Res.getUri("files/music/Epic_Ballz_backing.ogg")
+    val toneUri = Res.getUri("files/sounds/Tone2.wav")
+    val ballsSongUri = Res.getUri("files/music/Epic_Ballz_backing.ogg")
+    val padsSongUri = Res.getUri("files/music/PadsEMaj.ogg")
+
     val sound: Sound = SoundPlayer()
-    val music: Music = MusicPlayer()
     sound.init()
-    music.init()
-    val id = sound.loadSound(uri)
-    music.load(song)
+    val toneId = sound.loadSound(toneUri)
+    val ballsMusic: Music = MusicPlayer().apply { init(); load(ballsSongUri) }
+    val padsMusic: Music = MusicPlayer().apply { init(); load(padsSongUri) }
+    val allMusic = listOf(ballsMusic, padsMusic)
+
+    fun playOnly(active: Music, loop: Boolean = true, volume: Float = 0.8f) {
+        allMusic.forEach { track -> if (track !== active) track.stop() }
+        active.play(loop = loop, volume = volume)
+    }
 
     ComposeViewport(document.body!!) {
         var started by remember { mutableStateOf(false) }
         if (!started) {
             StartOverlay(onStart = {
-                music.play(loop = true, volume = 0.8f)
                 started = true
             })
         } else {
-            BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                sound.play(id, 0.35f, freq)
-            })
+            DemoNavigator(
+                demos = listOf(
+                    Demo("The balls of fury! - Thanos Psaridis") {
+                        LaunchedEffect(Unit) { playOnly(ballsMusic) }
+                        BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
+                            sound.play(toneId, 0.35f, freq) // toneId was already loaded above — no per-call loading
+                        })
+                    },
+                    Demo("Circle") {
+                        LaunchedEffect(Unit) { playOnly(padsMusic) }
+                        CircleDemo()
+                    },
+                )
+            )
         }
     }
 
     window.addEventListener("beforeunload", { _: Event ->
         sound.dispose()
-        music.dispose()
+        allMusic.forEach { it.dispose() }
     })
 }
 

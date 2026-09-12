@@ -50,6 +50,7 @@ class MusicPlayer(
      */
     override fun load(path: String) {
         stop()
+        releaseDecoder()
 
         val bytes = readResourceBytes(path)
         val buffer = MemoryUtil.memAlloc(bytes.size)
@@ -90,6 +91,7 @@ class MusicPlayer(
 
     override fun play(loop: Boolean, volume: Float) {
         require(decoder != 0L) { "No track loaded — call load() first" }
+        stop()
         this.loop = loop
         alSourcef(source, AL_GAIN, volume.coerceAtLeast(0f))
         for (buf in streamBuffers) {
@@ -139,6 +141,13 @@ class MusicPlayer(
             }
         }
         if (decoder != 0L) {
+            stb_vorbis_seek_start(decoder)
+        }
+        scope?.cancel()
+    }
+
+    private fun releaseDecoder() {
+        if (decoder != 0L) {
             stb_vorbis_close(decoder)
             decoder = 0
         }
@@ -146,7 +155,6 @@ class MusicPlayer(
         pcmBuffer = null
         oggData?.let { MemoryUtil.memFree(it) }
         oggData = null
-        scope?.cancel()
     }
 
     private fun fillBuffer(bufferId: Int): Boolean {
@@ -166,6 +174,7 @@ class MusicPlayer(
 
     override fun dispose() {
         stop()
+        releaseDecoder()
         if (source != 0) alDeleteSources(source)
         alDeleteBuffers(streamBuffers)
     }

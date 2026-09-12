@@ -13,14 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,42 +32,62 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        val toneUri = Res.getUri("files/sounds/Tone2.wav")
+        val ballsSongUri = Res.getUri("files/music/Epic_Ballz_backing.ogg")
+        val padsSongUri = Res.getUri("files/music/PadsEMaj.ogg")
+
         setContent {
             val context = LocalContext.current
 
             val sound: Sound = remember { SoundPlayer(context) }
-            val music: Music = remember { MusicPlayer(context) }
+            val ballsMusic: Music = remember { MusicPlayer(context) }
+            val padsMusic: Music = remember { MusicPlayer(context) }
+            val allMusic = remember { listOf(ballsMusic, padsMusic) }
 
             var soundId by remember { mutableIntStateOf(-1) }
             var started by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
-                val uri = Res.getUri("files/sounds/Tone2.wav")
-                val song = Res.getUri("files/music/Epic_Ballz_backing.ogg")
-
                 sound.init()
-                music.init()
-                soundId = sound.loadSound(uri)
-                music.load(song)
+                soundId = sound.loadSound(toneUri)
+                ballsMusic.init()
+                ballsMusic.load(ballsSongUri)
+                padsMusic.init()
+                padsMusic.load(padsSongUri)
+            }
+
+            fun playOnly(active: Music, loop: Boolean = true, volume: Float = 0.8f) {
+                allMusic.forEach { track -> if (track !== active) track.stop() }
+                active.play(loop = loop, volume = volume)
             }
 
             DisposableEffect(Unit) {
                 onDispose {
                     sound.dispose()
-                    music.dispose()
+                    allMusic.forEach { it.dispose() }
                 }
             }
 
             MaterialTheme {
                 if (!started) {
                     StartOverlay(onStart = {
-                        music.play(loop = true, volume = 0.8f)
                         started = true
                     })
                 } else {
-                    BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                        sound.play(soundId, 0.40f, freq)
-                    })
+                    DemoNavigator(
+                        demos = listOf(
+                            Demo("The balls of fury! - Thanos Psaridis") {
+                                LaunchedEffect(Unit) { playOnly(ballsMusic) }
+                                BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
+                                    sound.play(soundId, 0.40f, freq)
+                                })
+                            },
+                            Demo("Circle") {
+                                LaunchedEffect(Unit) { playOnly(padsMusic) }
+                                CircleDemo()
+                            },
+                        )
+                    )
                 }
             }
         }
@@ -109,30 +122,6 @@ fun StartOverlay(onStart: () -> Unit) {
         }
     }
 }
-
-/**
- * old code to keep screen on
- */
-/*@Composable
-fun KeepScreenOn() {
-    val context = LocalContext.current
-    DisposableEffect(Unit) {
-        val window = context.findActivity()?.window
-        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        onDispose {
-            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
-}
-
-fun Context.findActivity(): Activity? {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is Activity) return context
-        context = context.baseContext
-    }
-    return null
-}*/
 
 @Preview
 @Composable
