@@ -1,6 +1,5 @@
 package io.github.thanosfisherman.demo.ballsoffury
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
@@ -16,13 +15,13 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
+import io.github.thanosfisherman.demo.GameLoopCanvas
 import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import io.github.thanosfisherman.demo.mapRange
+import io.github.thanosfisherman.demo.rememberGameLoopState
 import io.github.thanosfisherman.demo.sinDeg
-import kotlinx.coroutines.isActive
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 // ---------- Virtual viewport ----------
 // Two fixed virtual sizes, one per orientation, so the fit-viewport scale isn't fighting a
@@ -116,12 +115,9 @@ fun BouncingBallsInVGame(
 ) {
     var isPortrait by remember { mutableStateOf(false) }
     var scene by remember { mutableStateOf<Scene?>(null) }
-    var frameTick by remember { mutableStateOf(false) }
-    var isAssigned by remember { mutableStateOf(false) }
-    var fps by remember { mutableIntStateOf(0) } // updated once/sec — cheap to recompose on, unlike frameTick
     var scaleLabel by remember { mutableStateOf("TRITONE SCALE") }
     var ballSpeed by remember { mutableStateOf("") }
-    var dt by remember { mutableFloatStateOf(0f) }
+    val gameLoopState = rememberGameLoopState()
     // Always built at a fixed virtual size, so it never depends on the actual window/layout
     // size — but which fixed size depends on orientation, so it keeps rebuilding (only) when
     // the device actually rotates between portrait and landscape, or ballCount changes.
@@ -130,30 +126,17 @@ fun BouncingBallsInVGame(
         scene = buildScene(virtualSize, ballCount)
     }
 
-    // The game loop: one step per display frame, advanced by measured delta time.
-    LaunchedEffect(Unit) {
-        var lastFrameTimeNanos = 0L
-
-        // FPS logging: accumulated over a rolling 1-second window using the *raw*
-        // (unclamped) frame delta — MAX_DT below is a physics safety clamp, not a
-        // measurement of what the display is actually doing.
-        var fpsAccumSeconds = 0f
-        var fpsFrameCount = 0
+    Box(modifier = Modifier.fillMaxSize().keepScreenOn()) {
         var timer = 0f
 
         // Track the active state index so logic only triggers on changes
         var currentScaleIndex = -1
         var currentSpeedIndex = -1
 
-        while (isActive) {
-            withFrameNanos { frameTimeNanos ->
-                val rawDt = if (lastFrameTimeNanos == 0L) {
-                    0f
-                } else {
-                    (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
-                }
-                dt = rawDt.coerceAtMost(Config.MAX_DT)
-                lastFrameTimeNanos = frameTimeNanos
+        GameLoopCanvas(
+            modifier = modifier
+                .fillMaxSize()
+                .onSizeChanged { isPortrait = it.height > it.width }, gameLoopState = gameLoopState, onUpdate = { dt ->
 
                 scene?.let { s ->
                     timer += dt
@@ -200,61 +183,35 @@ fun BouncingBallsInVGame(
                             }
                         }
                     }
-                }
-
-                if (rawDt > 0f) {
-                    fpsAccumSeconds += rawDt
-                    fpsFrameCount++
-                    if (fpsAccumSeconds >= 1f) {
-                        val measuredFps = fpsFrameCount / fpsAccumSeconds
-                        fps = measuredFps.roundToInt()
-                        //println("FPS: ${(fps * 10f).roundToInt() / 10f}")
-                        fpsAccumSeconds = 0f
-                        fpsFrameCount = 0
+                    s.balls.forEach {
+                        updateBall(it, dt, onBounce)
                     }
                 }
-                frameTick = !frameTick // bump so the Canvas below knows to redraw
-            }
-        }
-    }
+            }, onDraw = {
 
-    Box(modifier = Modifier.fillMaxSize().keepScreenOn()) {
+                drawBackground() // fills the whole actual canvas — doubles as the viewport's letterbox/pillarbox color
 
-        Canvas(
-            modifier = modifier
-                .fillMaxSize()
-                .onSizeChanged { isPortrait = it.height > it.width }
-        ) {
-            // Reading frameTick subscribes this draw scope to it, so every increment
-            // from the game loop above triggers a fresh draw at a steady rate.
-            @Suppress("UNUSED_EXPRESSION")
-            frameTick
+                val s = scene ?: return@GameLoopCanvas
+                if (size.width <= 0f || size.height <= 0f) return@GameLoopCanvas
 
-            drawBackground() // fills the whole actual canvas — doubles as the viewport's letterbox/pillarbox color
+                val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
 
-            val s = scene ?: return@Canvas
-            if (size.width <= 0f || size.height <= 0f) return@Canvas
+                // Fit-viewport transform: one uniform scale (no stretch), centered — same idea as libGDX's FitViewport.
+                val fitScale = min(size.width / virtualSize.width, size.height / virtualSize.height)
+                val offsetX = (size.width - virtualSize.width * fitScale) / 2f
+                val offsetY = (size.height - virtualSize.height * fitScale) / 2f
 
-            val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
-
-            // Fit-viewport transform: one uniform scale (no stretch), centered — same idea as libGDX's FitViewport.
-            val fitScale = min(size.width / virtualSize.width, size.height / virtualSize.height)
-            val offsetX = (size.width - virtualSize.width * fitScale) / 2f
-            val offsetY = (size.height - virtualSize.height * fitScale) / 2f
-
-            translate(left = offsetX, top = offsetY) {
-                scale(fitScale, fitScale, pivot = Offset.Zero) {
-                    for (i in 0 until s.balls.size - 1) {
-                        updateBall(s.balls[i], dt, onBounce)
-                        drawBall(s.balls[i])
+                translate(left = offsetX, top = offsetY) {
+                    scale(fitScale, fitScale, pivot = Offset.Zero) {
+                        for (ball in s.balls) {
+                            drawBall(ball)
+                        }
+                        s.walls.forEach { drawWall(it) }
+                        drawChainLines(s.balls)
                     }
-                    updateBall(s.balls[s.balls.size - 1], dt, onBounce)
-                    drawBall(s.balls[s.balls.size - 1])
-                    s.walls.forEach { drawWall(it) }
-                    drawChainLines(s.balls)
                 }
-            }
-        }
+            })
+
         // Debug overlay — plain Compose text on top of the Canvas, not drawn via DrawScope,
         Column(
             modifier = Modifier
@@ -263,7 +220,7 @@ fun BouncingBallsInVGame(
                 .padding(8.dp)
         ) {
             BasicText(text = "Balls of Fury - Thanos Psaridis", style = Config.DEBUG_TEXT_STYLE)
-            BasicText(text = "FPS: $fps", style = Config.DEBUG_TEXT_STYLE)
+            BasicText(text = "FPS: ${gameLoopState.fps}", style = Config.DEBUG_TEXT_STYLE)
             BasicText(text = "Scale: $scaleLabel", style = Config.DEBUG_TEXT_STYLE)
             BasicText(text = "Ball speed: $ballSpeed", style = Config.DEBUG_TEXT_STYLE)
         }

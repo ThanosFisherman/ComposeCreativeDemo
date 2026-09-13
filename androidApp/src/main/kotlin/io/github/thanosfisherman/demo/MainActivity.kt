@@ -27,7 +27,7 @@ import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
-import io.github.thanosfisherman.demo.pendulums.CircleDemo
+import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
                 } else {
                     DemoNavigator(
                         demos = listOf(
-                            Demo("The balls of fury! - Thanos Psaridis") {
+                            Demo("The balls of Fury") {
                                 LaunchedEffect(Unit) { playOnly(ballsMusic) }
                                 BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
                                     sound.play(soundId, 0.40f, freq)
@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                             },
                             Demo("Circle") {
                                 LaunchedEffect(Unit) { playOnly(padsMusic) }
-                                CircleDemo()
+                                PendulumsDemo()
                             },
                         )
                     )

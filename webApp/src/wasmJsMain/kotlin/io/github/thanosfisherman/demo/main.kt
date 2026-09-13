@@ -21,7 +21,7 @@ import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
-import io.github.thanosfisherman.demo.pendulums.CircleDemo
+import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.events.Event
@@ -54,7 +54,7 @@ fun main() {
         } else {
             DemoNavigator(
                 demos = listOf(
-                    Demo("The balls of fury! - Thanos Psaridis") {
+                    Demo("The balls of Fury") {
                         LaunchedEffect(Unit) { playOnly(ballsMusic) }
                         BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
                             sound.play(toneId, 0.35f, freq) // toneId was already loaded above — no per-call loading
@@ -62,7 +62,7 @@ fun main() {
                     },
                     Demo("Circle") {
                         LaunchedEffect(Unit) { playOnly(padsMusic) }
-                        CircleDemo()
+                        PendulumsDemo()
                     },
                 )
             )
