@@ -86,7 +86,9 @@ class MainActivity : ComponentActivity() {
                             },
                             Demo("Pendulums") {
                                 LaunchedEffect(Unit) { playOnly(padsMusic) }
-                                PendulumsDemo()
+                                PendulumsDemo { freq->
+
+                                }
                             },
                         )
                     )

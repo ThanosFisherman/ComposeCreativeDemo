@@ -62,7 +62,9 @@ fun main() {
                     },
                     Demo("Pendulums") {
                         LaunchedEffect(Unit) { playOnly(padsMusic) }
-                        PendulumsDemo()
+                        PendulumsDemo { freq ->
+
+                        }
                     },
                 )
             )

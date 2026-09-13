@@ -13,20 +13,10 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onSizeChanged
 import io.github.thanosfisherman.demo.GameLoopCanvas
+import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import io.github.thanosfisherman.demo.mapRange
 import io.github.thanosfisherman.demo.toRadians
 import kotlin.math.*
-
-/*
- * "Pendulums" demo — same philosophy as BouncingBallsInVGame: purely kinematic, no physics,
- * built on the shared GameLoopCanvas.
- *
- * Each pendulum swings left/right driven by an oscillating angle (0..180, sweeping and mirroring —
- * the exact same state machine BouncingBallsInVGame's balls use) mapped to a swing deflection in degrees.
- * Pendulums have different thread lengths and speed modifiers, creating a mesmerizing pendulum wave pattern.
- * When a pendulum crosses the vertical center line, a glow pulse is triggered on that ball,
- * decaying the same way BouncingBallsInVGame's post-bounce flash does.
- */
 
 // ---------- Virtual viewport (same pattern as BouncingBallsInVGame) ----------
 private val VIRTUAL_SIZE_LANDSCAPE = Size(1024f, 480f)
@@ -60,6 +50,7 @@ private class PendulumBall(
     val speedModifier: Float,
     val color: Color,
     var phase: Float = 0f,
+    var pitch: Float,
 ) {
     var previousSwingRad = 0f
     var position = Offset.Zero
@@ -89,11 +80,14 @@ private fun buildScene(size: Size, pendulumCount: Int): PendulumScene {
         )
         val hue = 195f + t * 40f // stays in the blue family, matching the pivot's color
         val startLeft = i % 2 == 0
+        val notes = MusicIntervals.MAJOR_PENTATONIC_SCALE
+        val noteIndex = i % notes.size
         PendulumBall(
             threadLength = threadLength,
             speedModifier = speedModifier,
             color = Color.hsv(hue, 0.7f, 1f),
             phase = if (startLeft) PI.toFloat() else 0f,
+            pitch = notes[noteIndex],
         )
     }
 
@@ -106,6 +100,7 @@ private fun updateBall(
     ball: PendulumBall,
     pivot: Offset,
     dt: Float,
+    onCrossedCenter: (Float) -> Unit
 ) {
     ball.phase += dt * ANGULAR_SPEED_RAD_PER_SEC * ball.speedModifier
 
@@ -114,6 +109,7 @@ private fun updateBall(
     val crossedCenter = ball.previousSwingRad * swingRad < 0f
     if (crossedCenter) {
         ball.pulse = 1f
+        onCrossedCenter(ball.pitch)
     }
 
     ball.previousSwingRad = swingRad
@@ -206,9 +202,13 @@ private fun DrawScope.drawPendulumBall(ball: PendulumBall) {
 fun PendulumsDemo(
     modifier: Modifier = Modifier,
     pendulumCount: Int = DEFAULT_PENDULUM_COUNT,
+    onCrossedCenter: (Float) -> Unit
 ) {
     var isPortrait by remember { mutableStateOf(false) }
     var scene by remember { mutableStateOf<PendulumScene?>(null) }
+    var timer by remember { mutableFloatStateOf(0f) }
+    var currentScaleIndex by remember { mutableIntStateOf(-1) }
+    var scaleLabel by remember { mutableStateOf("TRITONE SCALE") }
 
     LaunchedEffect(pendulumCount, isPortrait) {
         val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
@@ -220,7 +220,32 @@ fun PendulumsDemo(
             .fillMaxSize()
             .onSizeChanged { isPortrait = it.height > it.width },
         onUpdate = { dt ->
-            scene?.let { s -> s.balls.forEach { updateBall(it, s.pivot, dt) } }
+
+            scene?.let { s ->
+                timer += dt
+                // 1. Scale / Pitch updates (every 32 seconds)
+                val scaleIndex = (timer / 32f).toInt() % 2
+                if (scaleIndex != currentScaleIndex) {
+                    currentScaleIndex = scaleIndex
+                    val scale = when (scaleIndex) {
+                        0 -> {
+                            scaleLabel = "MAJOR PENTATONIC SCALE"
+                            println("MAJOR PENTATONIC SCALE")
+                            MusicIntervals.MAJOR_PENTATONIC_SCALE
+                        }
+
+                        else -> {
+                            scaleLabel = "MAJOR ADD 2 ARPEGGIO"
+                            println("MAJOR ADD 2 ARPEGGIO")
+                            MusicIntervals.MAJOR_ADD_2_ARPEGGIO
+                        }
+                    }
+                    s.balls.forEachIndexed { index, ball ->
+                        ball.pitch = scale[index % scale.size]
+                    }
+                }
+                s.balls.forEach { updateBall(it, s.pivot, dt, onCrossedCenter) }
+            }
         },
         onDraw = {
             drawBackground()
