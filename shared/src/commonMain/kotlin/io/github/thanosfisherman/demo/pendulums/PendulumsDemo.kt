@@ -14,11 +14,8 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onSizeChanged
 import io.github.thanosfisherman.demo.GameLoopCanvas
 import io.github.thanosfisherman.demo.mapRange
-import io.github.thanosfisherman.demo.sinDeg
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.min
+import io.github.thanosfisherman.demo.toRadians
+import kotlin.math.*
 
 /*
  * "Pendulums" demo — same philosophy as BouncingBallsInVGame: purely kinematic, no physics,
@@ -38,12 +35,12 @@ private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 // ---------- Tuning ----------
 private const val DEFAULT_PENDULUM_COUNT = 18
 private const val PIVOT_LINE_Y_FRACTION = 0.001f      // how far down from the top the pivot sits
-private const val THREAD_LENGTH_MIN_FRACTION = 0.24f  // shortest thread, as a fraction of canvas height
-private const val THREAD_LENGTH_MAX_FRACTION = 0.80f  // longest thread
+private const val THREAD_LENGTH_MIN_FRACTION = 0.34f  // shortest thread, as a fraction of canvas height
+private const val THREAD_LENGTH_MAX_FRACTION = 0.70f  // longest thread
 private const val MAX_SWING_DEG = 80f                 // how far left/right of vertical the swing goes
-private const val ANGULAR_SPEED_DEG_PER_SEC = 90f    // full 0->180 sweep in a bit over 1.5s
+private const val ANGULAR_SPEED_RAD_PER_SEC = 0.8f
 private const val SPEED_MODIFIER_MAX = 1f
-private const val SPEED_MODIFIER_MIN = 0.75f
+private const val SPEED_MODIFIER_MIN = 0.65f
 private const val PENDULUM_RADIUS = 8f
 private const val PENDULUM_STROKE_WIDTH = 2.2f
 private const val PULSE_DECAY_PER_SEC = 5f            // same fade rate as BouncingBallsInVGame's flash
@@ -51,11 +48,10 @@ private const val PULSE_DECAY_PER_SEC = 5f            // same fade rate as Bounc
 private const val PIVOT_RADIUS = 14f
 private const val PIVOT_GLOW_RADIUS_MULTIPLIER = 3f
 
-private val GUIDE_LINE_COLOR = Color.White.copy(alpha = 0.35f)
-private val THREAD_COLOR = Color.White.copy(alpha = 0.5f)
+private val GUIDE_LINE_COLOR = Color.White.copy(alpha = 0.55f)
+private val THREAD_COLOR = Color.White.copy(alpha = 0.3f)
 private val PIVOT_COLOR = Color(0xFF6EA8FF)
 
-private fun cosDeg(degrees: Float): Float = cos(degrees * (PI.toFloat() / 180f))
 
 // ---------- Model ----------
 
@@ -63,12 +59,11 @@ private class PendulumBall(
     val threadLength: Float,
     val speedModifier: Float,
     val color: Color,
-    var angle: Float = 0f,
-    var forward: Boolean = true,
+    var phase: Float = 0f,
 ) {
-    var previousSwingDeg = mapRange(0f, 180f, -MAX_SWING_DEG, MAX_SWING_DEG, angle)
+    var previousSwingRad = 0f
     var position = Offset.Zero
-    var pulse = 0f // 0..1, flashes when the swing crosses the center line, then decays
+    var pulse = 0f
 }
 
 private class PendulumScene(
@@ -98,8 +93,7 @@ private fun buildScene(size: Size, pendulumCount: Int): PendulumScene {
             threadLength = threadLength,
             speedModifier = speedModifier,
             color = Color.hsv(hue, 0.7f, 1f),
-            angle = if (startLeft) 0f else 180f,
-            forward = startLeft,
+            phase = if (startLeft) PI.toFloat() else 0f,
         )
     }
 
@@ -108,35 +102,31 @@ private fun buildScene(size: Size, pendulumCount: Int): PendulumScene {
 
 // ---------- Update ----------
 
-private fun updateBall(ball: PendulumBall, pivot: Offset, dt: Float) {
-    if (ball.forward) {
-        ball.angle += dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
-        if (ball.angle > 180f) {
-            ball.angle = 180f - (ball.angle - 180f)
-            ball.forward = false
-        }
-    } else {
-        ball.angle -= dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
-        if (ball.angle < 0f) {
-            ball.angle = -ball.angle
-            ball.forward = true
-        }
+private fun updateBall(
+    ball: PendulumBall,
+    pivot: Offset,
+    dt: Float,
+) {
+    ball.phase += dt * ANGULAR_SPEED_RAD_PER_SEC * ball.speedModifier
+
+    val swingRad = MAX_SWING_DEG.toRadians() * cos(ball.phase)
+
+    val crossedCenter = ball.previousSwingRad * swingRad < 0f
+    if (crossedCenter) {
+        ball.pulse = 1f
     }
 
-    val swingDeg = mapRange(0f, 180f, -MAX_SWING_DEG, MAX_SWING_DEG, ball.angle)
-
-    val crossedCenter = ball.previousSwingDeg * swingDeg < 0f
-    ball.previousSwingDeg = swingDeg
-
-    val sinValue = sinDeg(swingDeg)
-    val cosValue = cosDeg(swingDeg)
+    ball.previousSwingRad = swingRad
 
     ball.position = Offset(
-        x = pivot.x + sinValue * ball.threadLength,
-        y = pivot.y + cosValue * ball.threadLength,
+        x = pivot.x + sin(swingRad) * ball.threadLength,
+        y = pivot.y + cos(swingRad) * ball.threadLength,
     )
-    if (crossedCenter) ball.pulse = 1f
-    ball.pulse = max(0f, ball.pulse - dt * PULSE_DECAY_PER_SEC)
+
+    ball.pulse = max(
+        0f,
+        ball.pulse - dt * PULSE_DECAY_PER_SEC
+    )
 }
 
 // ---------- Rendering ----------
@@ -175,7 +165,7 @@ private fun DrawScope.drawPivotCircle(center: Offset) {
 }
 
 private fun DrawScope.drawThread(pivot: Offset, ball: PendulumBall) {
-    drawLine(color = THREAD_COLOR, start = pivot, end = ball.position, strokeWidth = 1.5f)
+    drawLine(color = THREAD_COLOR, start = pivot, end = ball.position, strokeWidth = 0.82f)
 }
 
 /** Same ring-glow technique as BouncingBallsInVGame's drawBall: transparent center, transparent

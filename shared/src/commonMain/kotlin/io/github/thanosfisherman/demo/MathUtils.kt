@@ -19,3 +19,10 @@ fun wallXAtY(wall: Wall, y: Float): Float {
     val t = ((y - wall.p1.y) / denom).coerceIn(0f, 1f)
     return wall.p1.x + (wall.p2.x - wall.p1.x) * t
 }
+
+
+fun Float.toDegrees(): Float =
+    this * (180f / PI.toFloat())
+
+fun Float.toRadians(): Float =
+    this * (PI.toFloat() / 180f)
