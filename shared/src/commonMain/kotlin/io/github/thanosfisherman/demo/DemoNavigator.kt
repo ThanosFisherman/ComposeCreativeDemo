@@ -23,25 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** One entry in the demo carousel: a display name plus the composable content to show for it. */
 data class Demo(val name: String, val content: @Composable () -> Unit)
 
 private val DEMO_LABEL_STYLE = TextStyle(color = Color.White, fontSize = 14.sp, fontFamily = FontFamily.Monospace)
 
-/**
- * Hosts a list of [demos] full-screen, one at a time, with Previous/Next buttons pinned to
- * the bottom to step between them.
- *
- * Deliberately knows nothing about what any individual demo needs (sound, ball counts, wiring
- * to a SoundPlayer, whatever) — same principle as BouncingBallsInVGame's onBounce param: the
- * caller builds each Demo's `content` lambda with everything it needs already captured, e.g.
- *   Demo("Bouncing Balls") { BouncingBallsInVGame(ballCount = 14, onBounce = { ... }) }
- * so this file never has to change when a demo's own requirements change.
- *
- * Previous/Next are disabled (not hidden) at the first/last demo rather than wrapping around —
- * easy to flip to `(index - 1 + demos.size) % demos.size` / `(index + 1) % demos.size` if you'd
- * rather it cycle.
- */
 @Composable
 fun DemoNavigator(demos: List<Demo>) {
     require(demos.isNotEmpty()) { "DemoNavigator needs at least one demo" }

@@ -1,4 +1,4 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.ballsoffury
 
 import androidx.compose.ui.geometry.Offset
 

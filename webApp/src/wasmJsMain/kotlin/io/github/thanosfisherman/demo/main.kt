@@ -20,6 +20,8 @@ import androidx.compose.ui.window.ComposeViewport
 import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
+import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
+import io.github.thanosfisherman.demo.pendulums.CircleDemo
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.events.Event

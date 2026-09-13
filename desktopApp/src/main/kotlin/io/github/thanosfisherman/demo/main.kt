@@ -26,6 +26,8 @@ import androidx.compose.ui.window.application
 import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
+import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
+import io.github.thanosfisherman.demo.pendulums.CircleDemo
 
 fun main() = application {
 

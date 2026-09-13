@@ -1,4 +1,4 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.ballsoffury
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -16,16 +16,9 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
-import io.github.thanosfisherman.demo.Config.ANGULAR_SPEED_DEG_PER_SEC
-import io.github.thanosfisherman.demo.Config.BALL_STROKE
-import io.github.thanosfisherman.demo.Config.BALL_STROKE_WIDTH
-import io.github.thanosfisherman.demo.Config.CHAIN_LINE_COLOR
-import io.github.thanosfisherman.demo.Config.DEBUG_TEXT_STYLE
-import io.github.thanosfisherman.demo.Config.MAX_DT
-import io.github.thanosfisherman.demo.Config.PARTICLE_RADIUS
-import io.github.thanosfisherman.demo.Config.PULSE_DECAY_PER_SEC
-import io.github.thanosfisherman.demo.Config.WALL_COLOR
 import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
+import io.github.thanosfisherman.demo.mapRange
+import io.github.thanosfisherman.demo.sinDeg
 import kotlinx.coroutines.isActive
 import kotlin.math.max
 import kotlin.math.min
@@ -42,7 +35,7 @@ private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
 private fun updateBall(ball: Ball, dt: Float, onBounce: (Float) -> Unit) {
     if (ball.forward) {
-        ball.angle += dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
+        ball.angle += dt * Config.ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
         if (ball.angle > 180f) {
             ball.angle = 180f - (ball.angle - 180f) // mirror back into range
             ball.forward = false
@@ -50,7 +43,7 @@ private fun updateBall(ball: Ball, dt: Float, onBounce: (Float) -> Unit) {
             onBounce(ball.pitch)
         }
     } else {
-        ball.angle -= dt * ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
+        ball.angle -= dt * Config.ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
         if (ball.angle < 0f) {
             ball.angle = -ball.angle // mirror back into range
             ball.forward = true
@@ -63,7 +56,7 @@ private fun updateBall(ball: Ball, dt: Float, onBounce: (Float) -> Unit) {
     val y = ball.startingY - sinDeg(ball.angle) * ball.amplitude // minus: arc bulges upward
     ball.position = Offset(x, y)
 
-    ball.pulse = max(0f, ball.pulse - dt * PULSE_DECAY_PER_SEC)
+    ball.pulse = max(0f, ball.pulse - dt * Config.PULSE_DECAY_PER_SEC)
 }
 
 
@@ -72,7 +65,7 @@ private fun DrawScope.drawBackground() {
 }
 
 private fun DrawScope.drawWall(wall: Wall) {
-    drawLine(color = WALL_COLOR, start = wall.p1, end = wall.p2, strokeWidth = 2f)
+    drawLine(color = Config.WALL_COLOR, start = wall.p1, end = wall.p2, strokeWidth = 2f)
 }
 
 /** Connects consecutive balls' centers — since each ball moves independently, this segment's
@@ -80,7 +73,7 @@ private fun DrawScope.drawWall(wall: Wall) {
 private fun DrawScope.drawChainLines(balls: List<Ball>) {
     for (i in 0 until balls.size - 1) {
         drawLine(
-            color = CHAIN_LINE_COLOR,
+            color = Config.CHAIN_LINE_COLOR,
             start = balls[i].position,
             end = balls[i + 1].position,
             strokeWidth = 2f,
@@ -89,11 +82,11 @@ private fun DrawScope.drawChainLines(balls: List<Ball>) {
 }
 
 private fun DrawScope.drawBall(ball: Ball) {
-    val radius = PARTICLE_RADIUS * (1f + ball.pulse * 0.3f)
+    val radius = Config.PARTICLE_RADIUS * (1f + ball.pulse * 0.3f)
 
     val glowRadius = radius * (1.5f + ball.pulse * 0.8f)
-    val innerRadius = radius - BALL_STROKE_WIDTH / 2f
-    val outerRadius = radius + BALL_STROKE_WIDTH / 2f
+    val innerRadius = radius - Config.BALL_STROKE_WIDTH / 2f
+    val outerRadius = radius + Config.BALL_STROKE_WIDTH / 2f
 
     drawCircle(
         brush = Brush.radialGradient(
@@ -110,7 +103,7 @@ private fun DrawScope.drawBall(ball: Ball) {
         center = ball.position,
     )
 
-    drawCircle(color = ball.color, radius = radius, center = ball.position, style = BALL_STROKE)
+    drawCircle(color = ball.color, radius = radius, center = ball.position, style = Config.BALL_STROKE)
 }
 
 // ---------- Composable ----------
@@ -159,7 +152,7 @@ fun BouncingBallsInVGame(
                 } else {
                     (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
                 }
-                dt = rawDt.coerceAtMost(MAX_DT)
+                dt = rawDt.coerceAtMost(Config.MAX_DT)
                 lastFrameTimeNanos = frameTimeNanos
 
                 scene?.let { s ->
@@ -190,7 +183,7 @@ fun BouncingBallsInVGame(
                     val speedIndex = (timer / 15f).toInt() % 3
                     if (speedIndex != currentSpeedIndex) {
                         currentSpeedIndex = speedIndex
-                        ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
+                        Config.ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
                             0 -> {
                                 ballSpeed = "MEDIUM"
                                 120f
@@ -269,10 +262,10 @@ fun BouncingBallsInVGame(
                 .safeDrawingPadding()
                 .padding(8.dp)
         ) {
-            BasicText(text = "Balls of Fury - Thanos Psaridis", style = DEBUG_TEXT_STYLE)
-            BasicText(text = "FPS: $fps", style = DEBUG_TEXT_STYLE)
-            BasicText(text = "Scale: $scaleLabel", style = DEBUG_TEXT_STYLE)
-            BasicText(text = "Ball speed: $ballSpeed", style = DEBUG_TEXT_STYLE)
+            BasicText(text = "Balls of Fury - Thanos Psaridis", style = Config.DEBUG_TEXT_STYLE)
+            BasicText(text = "FPS: $fps", style = Config.DEBUG_TEXT_STYLE)
+            BasicText(text = "Scale: $scaleLabel", style = Config.DEBUG_TEXT_STYLE)
+            BasicText(text = "Ball speed: $ballSpeed", style = Config.DEBUG_TEXT_STYLE)
         }
     }
 }
