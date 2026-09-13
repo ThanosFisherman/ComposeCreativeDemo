@@ -24,11 +24,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 // ---------- Virtual viewport ----------
-// Two fixed virtual sizes, one per orientation, so the fit-viewport scale isn't fighting a
-// mismatched aspect ratio. Using the landscape (wide) virtual size on a portrait phone is what
-// made the scene look tiny — width became the limiting term in the fit-scale calculation, so
-// almost all of the screen's height went unused as letterboxing. Each virtual size still keeps
-// its own shape constant regardless of the real window size, exactly as before.
 private val VIRTUAL_SIZE_LANDSCAPE = Size(1024f, 480f)
 private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
@@ -57,7 +52,6 @@ private fun updateBall(ball: Ball, dt: Float, onBounce: (Float) -> Unit) {
 
     ball.pulse = max(0f, ball.pulse - dt * Config.PULSE_DECAY_PER_SEC)
 }
-
 
 private fun DrawScope.drawBackground() {
     drawRect(color = Color.Black)
@@ -118,6 +112,10 @@ fun BouncingBallsInVGame(
     var scaleLabel by remember { mutableStateOf("TRITONE SCALE") }
     var ballSpeed by remember { mutableStateOf("") }
     val gameLoopState = rememberGameLoopState()
+    var timer by remember { mutableFloatStateOf(0f) }
+    var currentScaleIndex by remember { mutableIntStateOf(-1) }
+    var currentSpeedIndex by remember { mutableIntStateOf(-1) }
+
     // Always built at a fixed virtual size, so it never depends on the actual window/layout
     // size — but which fixed size depends on orientation, so it keeps rebuilding (only) when
     // the device actually rotates between portrait and landscape, or ballCount changes.
@@ -127,32 +125,25 @@ fun BouncingBallsInVGame(
     }
 
     Box(modifier = Modifier.fillMaxSize().keepScreenOn()) {
-        var timer = 0f
-
-        // Track the active state index so logic only triggers on changes
-        var currentScaleIndex = -1
-        var currentSpeedIndex = -1
-
         GameLoopCanvas(
             modifier = modifier
                 .fillMaxSize()
-                .onSizeChanged { isPortrait = it.height > it.width }, gameLoopState = gameLoopState, onUpdate = { dt ->
-
+                .onSizeChanged { isPortrait = it.height > it.width },
+            gameLoopState = gameLoopState,
+            onUpdate = { dt ->
                 scene?.let { s ->
                     timer += dt
-                    // 1. Scale / Pitch updates (every 30 seconds)
+
+                    // 1. Scale / Pitch updates (every 32 seconds)
                     val scaleIndex = (timer / 32f).toInt() % 2
                     if (scaleIndex != currentScaleIndex) {
                         currentScaleIndex = scaleIndex
                         val scale = when (scaleIndex) {
                             0 -> {
-                                //println("Tritone")
                                 scaleLabel = "TRITONE SCALE"
                                 MusicIntervals.TRITONE_SCALE
                             }
-
                             else -> {
-                                // println("Whole Tone")
                                 scaleLabel = "WHOLE TONE SCALE"
                                 MusicIntervals.WHOLE_TONE_SCALE
                             }
@@ -167,28 +158,16 @@ fun BouncingBallsInVGame(
                     if (speedIndex != currentSpeedIndex) {
                         currentSpeedIndex = speedIndex
                         Config.ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
-                            0 -> {
-                                ballSpeed = "MEDIUM"
-                                120f
-                            }
-
-                            1 -> {
-                                ballSpeed = "FAST"
-                                180f
-                            }
-
-                            else -> {
-                                ballSpeed = "SLOW"
-                                90f
-                            }
+                            0 -> { ballSpeed = "MEDIUM"; 120f }
+                            1 -> { ballSpeed = "FAST"; 180f }
+                            else -> { ballSpeed = "SLOW"; 90f }
                         }
                     }
-                    s.balls.forEach {
-                        updateBall(it, dt, onBounce)
-                    }
-                }
-            }, onDraw = {
 
+                    s.balls.forEach { updateBall(it, dt, onBounce) }
+                }
+            },
+            onDraw = {
                 drawBackground() // fills the whole actual canvas — doubles as the viewport's letterbox/pillarbox color
 
                 val s = scene ?: return@GameLoopCanvas
@@ -203,16 +182,15 @@ fun BouncingBallsInVGame(
 
                 translate(left = offsetX, top = offsetY) {
                     scale(fitScale, fitScale, pivot = Offset.Zero) {
-                        for (ball in s.balls) {
-                            drawBall(ball)
-                        }
                         s.walls.forEach { drawWall(it) }
                         drawChainLines(s.balls)
+                        for (ball in s.balls) { drawBall(ball) } // last, so balls render on top of walls/lines
                     }
                 }
-            })
+            },
+        )
 
-        // Debug overlay — plain Compose text on top of the Canvas, not drawn via DrawScope,
+        // Debug overlay — plain Compose text on top of the Canvas, not drawn via DrawScope.
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
