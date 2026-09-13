@@ -1,22 +1,16 @@
 package io.github.thanosfisherman.demo
 
 import io.github.thanosfisherman.demo.audioUtils.Music
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.lwjgl.openal.AL10.*
 import org.lwjgl.stb.STBVorbis.*
 import org.lwjgl.stb.STBVorbisInfo
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
-import java.io.InputStream
 import java.net.URI
-import java.net.URL
 import java.nio.ByteBuffer
 import java.nio.ShortBuffer
+import java.util.concurrent.Executors
 import kotlin.concurrent.Volatile
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -24,6 +18,9 @@ class MusicPlayer(
     bufferCount: Int = 4,
     private val bufferSizeSamples: Int = 8192
 ) : Music {
+    private val audioDispatcher = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "MusicPlayer-audio").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
     private var source = 0
     private val streamBuffers = IntArray(bufferCount)
 
@@ -36,7 +33,9 @@ class MusicPlayer(
     private var oggData: ByteBuffer? = null // must stay alive for the lifetime of the decoder
 
     private var loop = false
-    @Volatile private var playing = false
+
+    @Volatile
+    private var playing = false
     var scope: CoroutineScope? = null
 
     override fun init() {
@@ -101,7 +100,7 @@ class MusicPlayer(
         alSourcePlay(source)
         playing = true
         scope?.cancel()
-        scope = CoroutineScope(Dispatchers.Default)
+        scope = CoroutineScope(audioDispatcher)
         scope?.launch {
             while (playing) {
                 update()
