@@ -55,7 +55,7 @@ fun main() = application {
     }
 
     Window(
-        onCloseRequest = { exitApplication(); sound.dispose(); allMusic.forEach { it.dispose() } },
+        onCloseRequest = { sound.dispose(); allMusic.forEach { it.dispose() }; exitApplication() },
         title = "Balls of fury",
         onKeyEvent = { event ->
             if (event.key == Key.Escape && event.type == KeyEventType.KeyUp) {
@@ -81,7 +81,7 @@ fun main() = application {
                         },
                         Demo("Pendulums") {
                             LaunchedEffect(Unit) { playOnly(padsMusic) }
-                            PendulumsDemo { freq->
+                            PendulumsDemo { freq ->
                                 sound.play(soundId, 0.35f, freq)
                             }
                         },
