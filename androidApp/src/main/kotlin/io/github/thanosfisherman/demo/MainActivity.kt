@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
                                     sound.play(soundId, 0.40f, freq)
                                 })
                             },
-                            Demo("Circle") {
+                            Demo("Pendulums") {
                                 LaunchedEffect(Unit) { playOnly(padsMusic) }
                                 PendulumsDemo()
                             },

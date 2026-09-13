@@ -60,7 +60,7 @@ fun main() {
                             sound.play(toneId, 0.35f, freq) // toneId was already loaded above — no per-call loading
                         })
                     },
-                    Demo("Circle") {
+                    Demo("Pendulums") {
                         LaunchedEffect(Unit) { playOnly(padsMusic) }
                         PendulumsDemo()
                     },

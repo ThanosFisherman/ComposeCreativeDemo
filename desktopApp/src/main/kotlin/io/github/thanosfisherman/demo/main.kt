@@ -79,7 +79,7 @@ fun main() = application {
                                 sound.play(soundId, 0.35f, freq)
                             })
                         },
-                        Demo("Circle") {
+                        Demo("Pendulums") {
                             LaunchedEffect(Unit) { playOnly(padsMusic) }
                             PendulumsDemo()
                         },
