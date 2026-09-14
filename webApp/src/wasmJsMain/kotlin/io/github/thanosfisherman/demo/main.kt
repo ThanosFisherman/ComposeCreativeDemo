@@ -43,14 +43,6 @@ fun main() {
         } else {
             DemoNavigator(
                 demos = listOf(
-                    Demo("The balls of Fury") {
-                        LaunchedEffect(Unit) { playOnly(audioManager.getBouncingBallsMusic()) }
-                        BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                            val id = audioManager.getBouncingBallsSound().first
-                            val sound = audioManager.getBouncingBallsSound().second
-                            sound.play(id, 0.35f, freq)
-                        })
-                    },
                     Demo("Pendulums") {
                         LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic(), volume = 0.4f) }
                         PendulumsDemo(onCrossedCenterSmall = { freq ->
@@ -63,6 +55,14 @@ fun main() {
                             sound.play(id, 0.78f, freq)
                         })
                     },
+                    Demo("The balls of Fury") {
+                        LaunchedEffect(Unit) { playOnly(audioManager.getBouncingBallsMusic()) }
+                        BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
+                            val id = audioManager.getBouncingBallsSound().first
+                            val sound = audioManager.getBouncingBallsSound().second
+                            sound.play(id, 0.35f, freq)
+                        })
+                    }
                 )
             )
         }

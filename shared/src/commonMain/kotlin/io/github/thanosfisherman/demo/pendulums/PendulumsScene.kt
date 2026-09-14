@@ -78,7 +78,7 @@ fun buildPendulumsScene(size: Size, pendulumCount: Int, bigBallsCount: Int): Pen
             i.toFloat()
         )
         val hue = t * 50f
-        val notes = MusicIntervals.ONE_FOUR_FIVE_ONE2
+        val notes = MusicIntervals.ONE_FOUR_FIVE
         val noteIndex = i % notes.size
 
         PendulumBall(
