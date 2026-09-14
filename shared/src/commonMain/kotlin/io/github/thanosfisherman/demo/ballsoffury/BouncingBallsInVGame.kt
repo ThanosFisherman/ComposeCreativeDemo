@@ -15,11 +15,8 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
-import io.github.thanosfisherman.demo.GameLoopCanvas
+import io.github.thanosfisherman.demo.*
 import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
-import io.github.thanosfisherman.demo.mapRange
-import io.github.thanosfisherman.demo.rememberGameLoopState
-import io.github.thanosfisherman.demo.sinDeg
 import kotlin.math.max
 import kotlin.math.min
 
@@ -96,7 +93,12 @@ private fun DrawScope.drawBall(bouncingBall: BouncingBall) {
         center = bouncingBall.position,
     )
 
-    drawCircle(color = bouncingBall.color, radius = radius, center = bouncingBall.position, style = BouncingBallsConfig.BALL_STROKE)
+    drawCircle(
+        color = bouncingBall.color,
+        radius = radius,
+        center = bouncingBall.position,
+        style = BouncingBallsConfig.BALL_STROKE
+    )
 }
 
 // ---------- Composable ----------
@@ -143,6 +145,7 @@ fun BouncingBallsInVGame(
                                 scaleLabel = "TRITONE SCALE"
                                 MusicIntervals.TRITONE_SCALE
                             }
+
                             else -> {
                                 scaleLabel = "WHOLE TONE SCALE"
                                 MusicIntervals.WHOLE_TONE_SCALE
@@ -158,9 +161,17 @@ fun BouncingBallsInVGame(
                     if (speedIndex != currentSpeedIndex) {
                         currentSpeedIndex = speedIndex
                         BouncingBallsConfig.ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
-                            0 -> { ballSpeed = "MEDIUM"; 120f }
-                            1 -> { ballSpeed = "FAST"; 180f }
-                            else -> { ballSpeed = "SLOW"; 90f }
+                            0 -> {
+                                ballSpeed = "MEDIUM"; 120f
+                            }
+
+                            1 -> {
+                                ballSpeed = "FAST"; 180f
+                            }
+
+                            else -> {
+                                ballSpeed = "SLOW"; 90f
+                            }
                         }
                     }
 
@@ -182,9 +193,12 @@ fun BouncingBallsInVGame(
 
                 translate(left = offsetX, top = offsetY) {
                     scale(fitScale, fitScale, pivot = Offset.Zero) {
+                        drawStars(s.stars)
                         s.walls.forEach { drawWall(it) }
                         drawChainLines(s.bouncingBalls)
-                        for (ball in s.bouncingBalls) { drawBall(ball) } // last, so balls render on top of walls/lines
+                        for (ball in s.bouncingBalls) {
+                            drawBall(ball)
+                        } // last, so balls render on top of walls/lines
                     }
                 }
             },

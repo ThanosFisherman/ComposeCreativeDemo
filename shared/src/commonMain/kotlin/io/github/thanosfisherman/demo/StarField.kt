@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 data class Star(val position: Offset, val sizePx: Float, val alpha: Float)
 
-fun generateStars(size: Size, count: Int = 100, seed: Long = 1L): List<Star> {
+fun generateStars(size: Size, count: Int = 100, seed: Long = 1132L): List<Star> {
     val random = Random(seed)
     return List(count) {
         Star(

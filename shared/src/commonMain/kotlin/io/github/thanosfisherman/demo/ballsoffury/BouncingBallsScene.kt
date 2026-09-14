@@ -2,13 +2,15 @@ package io.github.thanosfisherman.demo.ballsoffury
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import io.github.thanosfisherman.demo.Star
+import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsConfig.SPEED_MODIFIER_MAX
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsConfig.SPEED_MODIFIER_MIN
-import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
+import io.github.thanosfisherman.demo.generateStars
 import io.github.thanosfisherman.demo.mapRange
 import io.github.thanosfisherman.demo.wallXAtY
 
-data class BouncingBallsScene(val walls: List<Wall>, val bouncingBalls: List<BouncingBall>)
+data class BouncingBallsScene(val walls: List<Wall>, val bouncingBalls: List<BouncingBall>, val stars: List<Star>)
 
 
 fun buildBouncingBallsScene(size: Size, ballCount: Int): BouncingBallsScene {
@@ -20,8 +22,10 @@ fun buildBouncingBallsScene(size: Size, ballCount: Int): BouncingBallsScene {
     val lastRowY = firstRowY + (count - 1) * BouncingBallsConfig.ROW_SPACING
 
     // The wall geometry hugs that extent, with a small margin on each end.
-    val topY = (firstRowY - BouncingBallsConfig.ROW_TOP_MARGIN).coerceAtLeast(size.height * BouncingBallsConfig.WALL_TOP_MIN_Y_FRACTION)
-    val apexY = (lastRowY + BouncingBallsConfig.ROW_APEX_MARGIN).coerceAtMost(size.height * BouncingBallsConfig.WALL_APEX_MAX_Y_FRACTION)
+    val topY =
+        (firstRowY - BouncingBallsConfig.ROW_TOP_MARGIN).coerceAtLeast(size.height * BouncingBallsConfig.WALL_TOP_MIN_Y_FRACTION)
+    val apexY =
+        (lastRowY + BouncingBallsConfig.ROW_APEX_MARGIN).coerceAtMost(size.height * BouncingBallsConfig.WALL_APEX_MAX_Y_FRACTION)
 
     val apex = Offset(size.width / 2f, apexY)
     val topLeft = Offset(size.width * (0.5f - BouncingBallsConfig.WALL_HALF_WIDTH_FRACTION), topY)
@@ -57,6 +61,6 @@ fun buildBouncingBallsScene(size: Size, ballCount: Int): BouncingBallsScene {
             pitch = notes[noteIndex]
         )
     }
-
-    return BouncingBallsScene(listOf(leftWall, rightWall), bouncingBalls)
+    val stars = generateStars(size)
+    return BouncingBallsScene(listOf(leftWall, rightWall), bouncingBalls, stars)
 }
