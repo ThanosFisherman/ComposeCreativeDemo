@@ -134,7 +134,7 @@ class SoundPlayer(sourcePoolSize: Int = 16) : Sound {
         sourcePool.forEach { alDeleteSources(it) }
         bufferCache.values.forEach { alDeleteBuffers(it) }
         bufferCache.clear()
-        playbackExecutor.shutdown()
+        playbackExecutor.shutdownNow()
         ALC10.alcMakeContextCurrent(0)
         ALC10.alcDestroyContext(context)
         ALC10.alcCloseDevice(device)

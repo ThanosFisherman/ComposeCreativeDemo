@@ -23,42 +23,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
-import io.github.thanosfisherman.demo.audioUtils.Sound
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 
 fun main() = application {
 
-    val sound: Sound = remember { SoundPlayer() }
-    val ballsMusic: Music = remember { MusicPlayer() }
-    val padsMusic: Music = remember { MusicPlayer() }
-    val allMusic = remember { listOf(ballsMusic, padsMusic) }
-    var soundId by remember { mutableIntStateOf(-1) }
-    val toneUri = Res.getUri("files/sounds/Tone2.wav")
-    val ballsSongUri = Res.getUri("files/music/Epic_Ballz_backing.ogg")
-    val padsSongUri = Res.getUri("files/music/PadsEMaj.ogg")
+
+    val audioManager = remember { getAudioManager() }
 
     LaunchedEffect(Unit) {
-        sound.init()
-        ballsMusic.init()
-        padsMusic.init()
-        soundId = sound.loadSound(toneUri)
-        ballsMusic.load(ballsSongUri)
-        padsMusic.load(padsSongUri)
+        audioManager.init()
     }
 
     fun playOnly(active: Music, loop: Boolean = true, volume: Float = 0.8f) {
-        allMusic.forEach { track -> if (track !== active) track.stop() }
+        audioManager.allMusic.forEach { track -> if (track !== active) track.stop() }
         active.play(loop = loop, volume = volume)
     }
 
     Window(
-        onCloseRequest = { sound.dispose(); allMusic.forEach { it.dispose() }; exitApplication() },
+        onCloseRequest = { audioManager.allMusic.forEach { it.dispose() }; audioManager.allSounds.forEach { it.dispose() }; exitApplication() },
         title = "Balls of fury",
         onKeyEvent = { event ->
             if (event.key == Key.Escape && event.type == KeyEventType.KeyUp) {
+                audioManager.allMusic.forEach { it.dispose() }
+                audioManager.allSounds.forEach { it.dispose() }
                 exitApplication()
                 true
             } else false
@@ -74,15 +63,19 @@ fun main() = application {
                 DemoNavigator(
                     demos = listOf(
                         Demo("The balls of Fury") {
-                            LaunchedEffect(Unit) { playOnly(ballsMusic) }
+                            LaunchedEffect(Unit) { playOnly(audioManager.getBouncingBallsMusic()) }
                             BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                                sound.play(soundId, 0.35f, freq)
+                                val id = audioManager.getBouncingBallsSound().first
+                                val sound = audioManager.getBouncingBallsSound().second
+                                sound.play(id, 0.35f, freq)
                             })
                         },
                         Demo("Pendulums") {
-                            LaunchedEffect(Unit) { playOnly(padsMusic) }
+                            LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic()) }
                             PendulumsDemo { freq ->
-                                sound.play(soundId, 0.35f, freq)
+                                val id = audioManager.getPendulumsSound().first
+                                val sound = audioManager.getPendulumsSound().second
+                                sound.play(id, 0.35f, freq)
                             }
                         },
                     )

@@ -17,9 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.ComposeViewport
-import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
-import io.github.thanosfisherman.demo.audioUtils.Sound
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 import kotlinx.browser.document
@@ -29,19 +27,10 @@ import org.w3c.dom.events.Event
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
 
-    val toneUri = Res.getUri("files/sounds/Tone2.wav")
-    val ballsSongUri = Res.getUri("files/music/Epic_Ballz_backing.ogg")
-    val padsSongUri = Res.getUri("files/music/PadsEMaj.ogg")
-
-    val sound: Sound = SoundPlayer()
-    sound.init()
-    val toneId = sound.loadSound(toneUri)
-    val ballsMusic: Music = MusicPlayer().apply { init(); load(ballsSongUri) }
-    val padsMusic: Music = MusicPlayer().apply { init(); load(padsSongUri) }
-    val allMusic = listOf(ballsMusic, padsMusic)
+    val audioManager = getAudioManager().also { it.init() }
 
     fun playOnly(active: Music, loop: Boolean = true, volume: Float = 0.8f) {
-        allMusic.forEach { track -> if (track !== active) track.stop() }
+        audioManager.allMusic.forEach { track -> if (track !== active) track.stop() }
         active.play(loop = loop, volume = volume)
     }
 
@@ -55,15 +44,19 @@ fun main() {
             DemoNavigator(
                 demos = listOf(
                     Demo("The balls of Fury") {
-                        LaunchedEffect(Unit) { playOnly(ballsMusic) }
+                        LaunchedEffect(Unit) { playOnly(audioManager.getBouncingBallsMusic()) }
                         BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                            sound.play(toneId, 0.35f, freq) // toneId was already loaded above — no per-call loading
+                            val id = audioManager.getBouncingBallsSound().first
+                            val sound = audioManager.getBouncingBallsSound().second
+                            sound.play(id, 0.35f, freq)
                         })
                     },
                     Demo("Pendulums") {
-                        LaunchedEffect(Unit) { playOnly(padsMusic) }
+                        LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic()) }
                         PendulumsDemo { freq ->
-
+                            val id = audioManager.getPendulumsSound().first
+                            val sound = audioManager.getPendulumsSound().second
+                            sound.play(id, 0.35f, freq)
                         }
                     },
                 )
@@ -72,8 +65,8 @@ fun main() {
     }
 
     window.addEventListener("beforeunload", { _: Event ->
-        sound.dispose()
-        allMusic.forEach { it.dispose() }
+        audioManager.allSounds.forEach { it.dispose() }
+        audioManager.allMusic.forEach { it.dispose() }
     })
 }
 

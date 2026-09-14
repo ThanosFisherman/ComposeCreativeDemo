@@ -18,14 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.keepScreenOn
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import composecreativedemo.shared.generated.resources.Res
 import io.github.thanosfisherman.demo.audioUtils.Music
-import io.github.thanosfisherman.demo.audioUtils.Sound
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 
@@ -34,39 +31,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val toneUri = Res.getUri("files/sounds/Tone2.wav")
-        val ballsSongUri = Res.getUri("files/music/Epic_Ballz_backing.ogg")
-        val padsSongUri = Res.getUri("files/music/PadsEMaj.ogg")
+        initializeAudioManager(this)
+        val audioManager = getAudioManager()
 
         setContent {
-            val context = LocalContext.current
 
-            val sound: Sound = remember { SoundPlayer(context) }
-            val ballsMusic: Music = remember { MusicPlayer(context) }
-            val padsMusic: Music = remember { MusicPlayer(context) }
-            val allMusic = remember { listOf(ballsMusic, padsMusic) }
-
-            var soundId by remember { mutableIntStateOf(-1) }
             var started by remember { mutableStateOf(false) }
-
             LaunchedEffect(Unit) {
-                sound.init()
-                soundId = sound.loadSound(toneUri)
-                ballsMusic.init()
-                ballsMusic.load(ballsSongUri)
-                padsMusic.init()
-                padsMusic.load(padsSongUri)
+                audioManager.init()
             }
 
             fun playOnly(active: Music, loop: Boolean = true, volume: Float = 0.8f) {
-                allMusic.forEach { track -> if (track !== active) track.stop() }
+                audioManager.allMusic.forEach { track -> if (track !== active) track.stop() }
                 active.play(loop = loop, volume = volume)
             }
 
             DisposableEffect(Unit) {
                 onDispose {
-                    sound.dispose()
-                    allMusic.forEach { it.dispose() }
+                    audioManager.allSounds.forEach { it.dispose() }
+                    audioManager.allMusic.forEach { it.dispose() }
                 }
             }
 
@@ -79,15 +62,19 @@ class MainActivity : ComponentActivity() {
                     DemoNavigator(
                         demos = listOf(
                             Demo("The balls of Fury") {
-                                LaunchedEffect(Unit) { playOnly(ballsMusic) }
+                                LaunchedEffect(Unit) { playOnly(audioManager.getBouncingBallsMusic()) }
                                 BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                                    sound.play(soundId, 0.40f, freq)
+                                    val id = audioManager.getBouncingBallsSound().first
+                                    val sound = audioManager.getBouncingBallsSound().second
+                                    sound.play(id, 0.35f, freq)
                                 })
                             },
                             Demo("Pendulums") {
-                                LaunchedEffect(Unit) { playOnly(padsMusic) }
-                                PendulumsDemo { freq->
-
+                                LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic()) }
+                                PendulumsDemo { freq ->
+                                    val id = audioManager.getPendulumsSound().first
+                                    val sound = audioManager.getPendulumsSound().second
+                                    sound.play(id, 0.35f, freq)
                                 }
                             },
                         )
