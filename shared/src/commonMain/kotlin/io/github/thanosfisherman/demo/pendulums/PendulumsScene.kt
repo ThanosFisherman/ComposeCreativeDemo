@@ -13,6 +13,7 @@ import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.SPEED_MODIFIER_M
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.THREAD_LENGTH_MAX_FRACTION
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.THREAD_LENGTH_MIN_FRACTION
 import kotlin.math.PI
+import kotlin.math.min
 
 class PendulumScene(
     val pivot: Offset,
@@ -23,8 +24,9 @@ class PendulumScene(
 fun buildPendulumsScene(size: Size, pendulumCount: Int): PendulumScene {
     val count = pendulumCount.coerceAtLeast(1)
     val pivot = Offset(size.width / 2f, size.height * PIVOT_LINE_Y_FRACTION)
-    val minLength = size.height * THREAD_LENGTH_MIN_FRACTION
-    val maxLength = size.height * THREAD_LENGTH_MAX_FRACTION
+    val referenceDim = min(size.width, size.height)
+    val minLength = referenceDim * THREAD_LENGTH_MIN_FRACTION
+    val maxLength = referenceDim * THREAD_LENGTH_MAX_FRACTION
 
     val balls = List(count) { i ->
         val t = if (count <= 1) 0f else i / (count - 1f)
