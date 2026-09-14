@@ -29,7 +29,7 @@ private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
 private fun updateBall(bouncingBall: BouncingBall, dt: Float, onBounce: (Float) -> Unit) {
     if (bouncingBall.forward) {
-        bouncingBall.angle += dt * Config.ANGULAR_SPEED_DEG_PER_SEC * bouncingBall.speedModifier
+        bouncingBall.angle += dt * BouncingBallsConfig.ANGULAR_SPEED_DEG_PER_SEC * bouncingBall.speedModifier
         if (bouncingBall.angle > 180f) {
             bouncingBall.angle = 180f - (bouncingBall.angle - 180f) // mirror back into range
             bouncingBall.forward = false
@@ -37,7 +37,7 @@ private fun updateBall(bouncingBall: BouncingBall, dt: Float, onBounce: (Float) 
             onBounce(bouncingBall.pitch)
         }
     } else {
-        bouncingBall.angle -= dt * Config.ANGULAR_SPEED_DEG_PER_SEC * bouncingBall.speedModifier
+        bouncingBall.angle -= dt * BouncingBallsConfig.ANGULAR_SPEED_DEG_PER_SEC * bouncingBall.speedModifier
         if (bouncingBall.angle < 0f) {
             bouncingBall.angle = -bouncingBall.angle // mirror back into range
             bouncingBall.forward = true
@@ -50,7 +50,7 @@ private fun updateBall(bouncingBall: BouncingBall, dt: Float, onBounce: (Float) 
     val y = bouncingBall.startingY - sinDeg(bouncingBall.angle) * bouncingBall.amplitude // minus: arc bulges upward
     bouncingBall.position = Offset(x, y)
 
-    bouncingBall.pulse = max(0f, bouncingBall.pulse - dt * Config.PULSE_DECAY_PER_SEC)
+    bouncingBall.pulse = max(0f, bouncingBall.pulse - dt * BouncingBallsConfig.PULSE_DECAY_PER_SEC)
 }
 
 private fun DrawScope.drawBackground() {
@@ -58,7 +58,7 @@ private fun DrawScope.drawBackground() {
 }
 
 private fun DrawScope.drawWall(wall: Wall) {
-    drawLine(color = Config.WALL_COLOR, start = wall.p1, end = wall.p2, strokeWidth = 2f)
+    drawLine(color = BouncingBallsConfig.WALL_COLOR, start = wall.p1, end = wall.p2, strokeWidth = 2f)
 }
 
 /** Connects consecutive balls' centers — since each ball moves independently, this segment's
@@ -66,7 +66,7 @@ private fun DrawScope.drawWall(wall: Wall) {
 private fun DrawScope.drawChainLines(bouncingBalls: List<BouncingBall>) {
     for (i in 0 until bouncingBalls.size - 1) {
         drawLine(
-            color = Config.CHAIN_LINE_COLOR,
+            color = BouncingBallsConfig.CHAIN_LINE_COLOR,
             start = bouncingBalls[i].position,
             end = bouncingBalls[i + 1].position,
             strokeWidth = 2f,
@@ -75,11 +75,11 @@ private fun DrawScope.drawChainLines(bouncingBalls: List<BouncingBall>) {
 }
 
 private fun DrawScope.drawBall(bouncingBall: BouncingBall) {
-    val radius = Config.PARTICLE_RADIUS * (1f + bouncingBall.pulse * 0.3f)
+    val radius = BouncingBallsConfig.PARTICLE_RADIUS * (1f + bouncingBall.pulse * 0.3f)
 
     val glowRadius = radius * (1.5f + bouncingBall.pulse * 0.8f)
-    val innerRadius = radius - Config.BALL_STROKE_WIDTH / 2f
-    val outerRadius = radius + Config.BALL_STROKE_WIDTH / 2f
+    val innerRadius = radius - BouncingBallsConfig.BALL_STROKE_WIDTH / 2f
+    val outerRadius = radius + BouncingBallsConfig.BALL_STROKE_WIDTH / 2f
 
     drawCircle(
         brush = Brush.radialGradient(
@@ -96,7 +96,7 @@ private fun DrawScope.drawBall(bouncingBall: BouncingBall) {
         center = bouncingBall.position,
     )
 
-    drawCircle(color = bouncingBall.color, radius = radius, center = bouncingBall.position, style = Config.BALL_STROKE)
+    drawCircle(color = bouncingBall.color, radius = radius, center = bouncingBall.position, style = BouncingBallsConfig.BALL_STROKE)
 }
 
 // ---------- Composable ----------
@@ -108,7 +108,7 @@ fun BouncingBallsInVGame(
     onBounce: (freq: Float) -> Unit = {},
 ) {
     var isPortrait by remember { mutableStateOf(false) }
-    var scene by remember { mutableStateOf<Scene?>(null) }
+    var bouncingBallsScene by remember { mutableStateOf<BouncingBallsScene?>(null) }
     var scaleLabel by remember { mutableStateOf("TRITONE SCALE") }
     var ballSpeed by remember { mutableStateOf("") }
     val gameLoopState = rememberGameLoopState()
@@ -121,7 +121,7 @@ fun BouncingBallsInVGame(
     // the device actually rotates between portrait and landscape, or ballCount changes.
     LaunchedEffect(ballCount, isPortrait) {
         val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
-        scene = buildScene(virtualSize, ballCount)
+        bouncingBallsScene = buildBouncingBallsScene(virtualSize, ballCount)
     }
 
     Box(modifier = Modifier.fillMaxSize().keepScreenOn()) {
@@ -131,7 +131,7 @@ fun BouncingBallsInVGame(
                 .onSizeChanged { isPortrait = it.height > it.width },
             gameLoopState = gameLoopState,
             onUpdate = { dt ->
-                scene?.let { s ->
+                bouncingBallsScene?.let { s ->
                     timer += dt
 
                     // 1. Scale / Pitch updates (every 32 seconds)
@@ -157,7 +157,7 @@ fun BouncingBallsInVGame(
                     val speedIndex = (timer / 15f).toInt() % 3
                     if (speedIndex != currentSpeedIndex) {
                         currentSpeedIndex = speedIndex
-                        Config.ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
+                        BouncingBallsConfig.ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {
                             0 -> { ballSpeed = "MEDIUM"; 120f }
                             1 -> { ballSpeed = "FAST"; 180f }
                             else -> { ballSpeed = "SLOW"; 90f }
@@ -170,7 +170,7 @@ fun BouncingBallsInVGame(
             onDraw = {
                 drawBackground() // fills the whole actual canvas — doubles as the viewport's letterbox/pillarbox color
 
-                val s = scene ?: return@GameLoopCanvas
+                val s = bouncingBallsScene ?: return@GameLoopCanvas
                 if (size.width <= 0f || size.height <= 0f) return@GameLoopCanvas
 
                 val virtualSize = if (isPortrait) VIRTUAL_SIZE_PORTRAIT else VIRTUAL_SIZE_LANDSCAPE
@@ -197,10 +197,10 @@ fun BouncingBallsInVGame(
                 .safeDrawingPadding()
                 .padding(8.dp)
         ) {
-            BasicText(text = "Balls of Fury - Thanos Psaridis", style = Config.DEBUG_TEXT_STYLE)
-            BasicText(text = "FPS: ${gameLoopState.fps}", style = Config.DEBUG_TEXT_STYLE)
-            BasicText(text = "Scale: $scaleLabel", style = Config.DEBUG_TEXT_STYLE)
-            BasicText(text = "Ball speed: $ballSpeed", style = Config.DEBUG_TEXT_STYLE)
+            BasicText(text = "Balls of Fury - Thanos Psaridis", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
+            BasicText(text = "FPS: ${gameLoopState.fps}", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
+            BasicText(text = "Scale: $scaleLabel", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
+            BasicText(text = "Ball speed: $ballSpeed", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
         }
     }
 }
