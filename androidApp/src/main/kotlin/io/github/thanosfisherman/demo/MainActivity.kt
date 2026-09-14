@@ -1,6 +1,7 @@
 package io.github.thanosfisherman.demo
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,7 +14,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,29 +34,31 @@ import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var audioManager: AudioManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         initializeAudioManager(this)
-        val audioManager = getAudioManager()
+        audioManager = getAudioManager()
 
         setContent {
 
             var started by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
-                audioManager.init()
+                audioManager?.init()
             }
 
-            fun playOnly(active: Music, loop: Boolean = true, volume: Float = 0.8f) {
-                audioManager.allMusic.forEach { track -> if (track !== active) track.stop() }
-                active.play(loop = loop, volume = volume)
+            fun playOnly(active: Music?, loop: Boolean = true, volume: Float = 0.8f) {
+                audioManager?.allMusic?.forEach { track -> if (track !== active) track.stop() }
+                active?.play(loop = loop, volume = volume)
             }
 
             DisposableEffect(Unit) {
                 onDispose {
-                    audioManager.allSounds.forEach { it.dispose() }
-                    audioManager.allMusic.forEach { it.dispose() }
+                    audioManager?.dispose()
                 }
             }
 
@@ -62,19 +71,24 @@ class MainActivity : ComponentActivity() {
                     DemoNavigator(
                         demos = listOf(
                             Demo("The balls of Fury") {
-                                LaunchedEffect(Unit) { playOnly(audioManager.getBouncingBallsMusic()) }
+                                LaunchedEffect(Unit) { playOnly(audioManager?.getBouncingBallsMusic()) }
                                 BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                                    val id = audioManager.getBouncingBallsSound().first
-                                    val sound = audioManager.getBouncingBallsSound().second
-                                    sound.play(id, 0.35f, freq)
+                                    audioManager?.let {
+                                        val id = it.getBouncingBallsSound().first
+                                        val sound = it.getBouncingBallsSound().second
+                                        sound.play(id, 0.35f, freq)
+                                    }
                                 })
                             },
                             Demo("Pendulums") {
-                                LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic()) }
+                                LaunchedEffect(Unit) { playOnly(audioManager?.getPendulumsMusic()) }
                                 PendulumsDemo { freq ->
-                                    val id = audioManager.getPendulumsSound().first
-                                    val sound = audioManager.getPendulumsSound().second
-                                    sound.play(id, 0.35f, freq)
+
+                                    audioManager?.let {
+                                        val id = it.getPendulumsSound().first
+                                        val sound = it.getPendulumsSound().second
+                                        sound.play(id, 0.35f, freq)
+                                    }
                                 }
                             },
                         )
@@ -82,6 +96,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MainActivity", "onDestroy")
+        audioManager?.dispose()
     }
 }
 

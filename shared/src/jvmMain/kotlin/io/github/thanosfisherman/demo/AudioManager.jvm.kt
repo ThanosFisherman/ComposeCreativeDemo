@@ -60,6 +60,11 @@ class AudioManagerJvm : AudioManager {
 
     override fun getPendulumsMusic(): Music =
         pendulumsMusic
+
+    override fun dispose() {
+        allSounds.forEach { it.dispose() }
+        allMusic.forEach { it.dispose() }
+    }
 }
 
 private val audioManagerJvm by lazy {

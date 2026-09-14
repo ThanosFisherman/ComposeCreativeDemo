@@ -1,10 +1,11 @@
 package io.github.thanosfisherman.demo
 
 import composecreativedemo.shared.generated.resources.Res
+import io.github.thanosfisherman.demo.audioUtils.Disposable
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
 
-interface AudioManager {
+interface AudioManager : Disposable{
 
     val toneUri: String
         get() = Res.getUri("files/sounds/Tone2.wav")

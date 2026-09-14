@@ -60,7 +60,9 @@ class SoundPlayer(private val context: Context) : Sound {
     }
 
     override fun dispose() {
-        soundPool.release()
+        if (::soundPool.isInitialized) {
+            soundPool.release()
+        }
         loadedIds.clear()
         playbackExecutor.shutdown()
     }

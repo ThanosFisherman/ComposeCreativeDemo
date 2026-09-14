@@ -65,8 +65,7 @@ fun main() {
     }
 
     window.addEventListener("beforeunload", { _: Event ->
-        audioManager.allSounds.forEach { it.dispose() }
-        audioManager.allMusic.forEach { it.dispose() }
+        audioManager.dispose()
     })
 }
 

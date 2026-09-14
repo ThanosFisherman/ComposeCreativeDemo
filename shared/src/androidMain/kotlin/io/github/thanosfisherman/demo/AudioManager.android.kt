@@ -67,16 +67,22 @@ class AudioManagerAndroid(
 
     override fun getPendulumsMusic(): Music =
         pendulumsMusic
+
+    override fun dispose() {
+        allSounds.forEach { it.dispose() }
+        allMusic.forEach { it.dispose() }
+    }
 }
 
 private lateinit var audioManagerAndroid: AudioManagerAndroid
 
 fun initializeAudioManager(context: Context) {
-    if (!::audioManagerAndroid.isInitialized) {
-        audioManagerAndroid = AudioManagerAndroid(
-            context.applicationContext
-        )
+    if (::audioManagerAndroid.isInitialized) {
+        audioManagerAndroid.dispose()
     }
+    audioManagerAndroid = AudioManagerAndroid(
+        context.applicationContext
+    )
 }
 
 actual fun getAudioManager(): AudioManager = audioManagerAndroid

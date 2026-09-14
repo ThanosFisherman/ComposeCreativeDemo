@@ -42,12 +42,11 @@ fun main() = application {
     }
 
     Window(
-        onCloseRequest = { audioManager.allMusic.forEach { it.dispose() }; audioManager.allSounds.forEach { it.dispose() }; exitApplication() },
+        onCloseRequest = { audioManager.dispose(); exitApplication() },
         title = "Balls of fury",
         onKeyEvent = { event ->
             if (event.key == Key.Escape && event.type == KeyEventType.KeyUp) {
-                audioManager.allMusic.forEach { it.dispose() }
-                audioManager.allSounds.forEach { it.dispose() }
+                audioManager.dispose()
                 exitApplication()
                 true
             } else false

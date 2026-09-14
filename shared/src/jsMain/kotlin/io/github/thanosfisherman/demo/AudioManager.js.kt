@@ -34,6 +34,10 @@ class AudioManagerJs : AudioManager {
         TODO("Not yet implemented")
     }
 
+    override fun dispose() {
+        allSounds.forEach { it.dispose() }
+        allMusic.forEach { it.dispose() }
+    }
 }
 
 private val audioManagerJs by lazy<AudioManager> {
