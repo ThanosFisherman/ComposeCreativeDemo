@@ -10,7 +10,6 @@ import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.ANGULAR_SPEED_RAD_PER_SEC
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.GUIDE_LINE_COLOR
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.MAX_SWING_DEG
-import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.PENDULUM_RADIUS
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.PENDULUM_STROKE_WIDTH
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.PIVOT_COLOR
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.PIVOT_GLOW_RADIUS_MULTIPLIER
@@ -127,7 +126,7 @@ fun DrawScope.drawThread(pivot: Offset, ball: PendulumBall) {
  *  up to the stroke's inner edge, a colored band across the stroke, fading back to transparent
  *  outside it — pulse temporarily boosts radius/glow/alpha, same formula shape as the balls demo. */
 fun DrawScope.drawPendulumBall(ball: PendulumBall) {
-    val radius = PENDULUM_RADIUS * (1f + ball.pulse * 0.3f)
+    val radius = ball.radius
     val glowRadius = radius * (1.5f + ball.pulse * 0.8f)
     val innerRadius = radius - PENDULUM_STROKE_WIDTH / 2f
     val outerRadius = radius + PENDULUM_STROKE_WIDTH / 2f
