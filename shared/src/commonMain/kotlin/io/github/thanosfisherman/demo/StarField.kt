@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import kotlin.random.Random
 
-
 data class Star(val position: Offset, val sizePx: Float, val alpha: Float)
 
 fun generateStars(size: Size, count: Int = 100, seed: Long = 1L): List<Star> {
@@ -17,16 +16,12 @@ fun generateStars(size: Size, count: Int = 100, seed: Long = 1L): List<Star> {
                 x = random.nextFloat() * size.width,
                 y = random.nextFloat() * size.height,
             ),
-            sizePx = random.nextFloat() * 1.5f + 0.5f, // 0.5..2.0 — genuinely tiny; square vs. round is invisible at this size
-            alpha = random.nextFloat() * 0.5f + 0.3f,  // 0.3..0.8 — subtle brightness variance, still all white
+            sizePx = random.nextFloat() * (1.5f - 0.5f) + 0.5f, // [0.5..1.5]
+            alpha = random.nextFloat() * 0.5f + 0.3f,  // 0.3..0.8
         )
     }
 }
 
-/**
- * Draws a fixed set of tiny white star squares. Call this INSIDE your fit-viewport transform
- * (after your background fill, which should stay outside it so it still covers letterboxing).
- */
 fun DrawScope.drawStars(stars: List<Star>) {
     for (star in stars) {
         drawRect(
