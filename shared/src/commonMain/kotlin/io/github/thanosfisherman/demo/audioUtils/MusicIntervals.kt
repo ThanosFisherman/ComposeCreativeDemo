@@ -294,4 +294,10 @@ object MusicIntervals {
         MINOR_SEVENTH_1,
         OCTAVE_1
     )
+    val ONE_FOUR_FIVE_ONE2: FloatArray = floatArrayOf(
+        UNISON,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        OCTAVE_1
+    )
 }

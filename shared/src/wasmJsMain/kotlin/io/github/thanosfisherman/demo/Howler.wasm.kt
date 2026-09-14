@@ -15,9 +15,16 @@ external class Howl constructor(options: JsAny) : JsAny {
 }
 
 /**
- * Builds Howler's options object. Deliberately omits `html5: true` — Howler's
- * rate()/pitch control only works in Web Audio mode, not the HTML5 Audio fallback.
+ * Builds Howler's options object.
+ *
+ * html5 is intentionally omitted because rate()/pitch control
+ * requires Web Audio mode.
  */
 @OptIn(ExperimentalWasmJsInterop::class)
-internal fun howlOptions(src: String, loop: Boolean, volume: Double): JsAny =
-    js("({ src: [src], loop: loop, volume: volume })")
+internal fun howlOptions(
+    src: String,
+    loop: Boolean,
+    volume: Double,
+    pool: Int = 32
+): JsAny =
+    js("({ src: [src], loop: loop, volume: volume, pool: pool })")

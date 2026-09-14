@@ -9,13 +9,21 @@ class SoundPlayer : Sound {
     private val pathToId = HashMap<String, Int>()
 
     override fun init() {
-        // no-op — see MusicPlayer.init()
+        // no-op
     }
-
 
     override fun loadSound(path: String): Int {
         pathToId[path]?.let { return it }
-        val howl = Howl(howlOptions(src = path, loop = false, volume = 1.0))
+
+        val howl = Howl(
+            howlOptions(
+                src = path,
+                loop = false,
+                volume = 1.0,
+                pool = 32
+            )
+        )
+
         val id = howls.size
         howls.add(howl)
         pathToId[path] = id
@@ -24,8 +32,12 @@ class SoundPlayer : Sound {
 
     /**
      * Plays a short sound effect.
+     *
+     * Howler creates an independent playback instance for every call,
+     * allowing overlapping sounds without manually managing sources.
+     *
      * @param volume linear gain, 1.0 = normal
-     * @param pitch playback rate multiplier. Howler clamps this to 0.5–4.0 internally.
+     * @param pitch playback rate multiplier
      */
     override fun play(bufferId: Int, volume: Float, pitch: Float) {
         val howl = howls.getOrNull(bufferId) ?: return

@@ -70,12 +70,19 @@ fun main() = application {
                             })
                         },
                         Demo("Pendulums") {
-                            LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic()) }
-                            PendulumsDemo { freq ->
+                            LaunchedEffect(Unit) {
+                                playOnly(audioManager.getPendulumsMusic(), volume = 0.4f)
+                                //audioManager.allMusic.forEach { it.stop() }
+                            }
+                            PendulumsDemo(onCrossedCenterSmall = { freq ->
                                 val id = audioManager.getPendulumsSound().first
                                 val sound = audioManager.getPendulumsSound().second
-                                sound.play(id, 0.35f, freq)
-                            }
+                                sound.play(id, 0.34f, freq)
+                            }, onCrossedCenterBig = { freq ->
+                                val id = audioManager.getBigBallsPendulumsSound().first
+                                val sound = audioManager.getBigBallsPendulumsSound().second
+                                sound.play(id, 0.78f, freq)
+                            })
                         },
                     )
                 )

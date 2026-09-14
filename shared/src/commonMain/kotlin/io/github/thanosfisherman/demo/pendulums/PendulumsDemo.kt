@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import io.github.thanosfisherman.demo.GameLoopCanvas
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsConfig
 import io.github.thanosfisherman.demo.drawStars
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.DEFAULT_BIG_PENDULUM_COUNT
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.DEFAULT_PENDULUM_COUNT
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.VIRTUAL_SIZE_LANDSCAPE
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.VIRTUAL_SIZE_PORTRAIT
@@ -27,7 +28,9 @@ import kotlin.math.min
 fun PendulumsDemo(
     modifier: Modifier = Modifier,
     pendulumCount: Int = DEFAULT_PENDULUM_COUNT,
-    onCrossedCenter: (Float) -> Unit
+    bigPendulumCount: Int = DEFAULT_BIG_PENDULUM_COUNT,
+    onCrossedCenterSmall: (Float) -> Unit,
+    onCrossedCenterBig: (Float) -> Unit
 ) {
     var isPortrait by remember { mutableStateOf(false) }
     var scene by remember { mutableStateOf<PendulumScene?>(null) }
@@ -36,7 +39,7 @@ fun PendulumsDemo(
     val gameLoopState = rememberGameLoopState()
 
     LaunchedEffect(pendulumCount, isPortrait) {
-        scene = buildPendulumsScene(virtualSize, pendulumCount)
+        scene = buildPendulumsScene(virtualSize, pendulumCount, bigPendulumCount)
         pendulumSim = PendulumsSim(scene)
     }
     Box(modifier = Modifier.fillMaxSize().keepScreenOn()) {
@@ -46,7 +49,7 @@ fun PendulumsDemo(
                 .onSizeChanged { isPortrait = it.height > it.width },
             gameLoopState = gameLoopState,
             onUpdate = { dt ->
-                pendulumSim?.update(dt, onCrossedCenter)
+                pendulumSim?.update(dt, onCrossedCenterSmall, onCrossedCenterBig)
             },
             onDraw = {
                 drawBackground()
@@ -64,6 +67,8 @@ fun PendulumsDemo(
                         drawGuideLines(s.pivot, virtualSize)
                         s.balls.forEach { drawThread(s.pivot, it) }
                         s.balls.forEach { drawPendulumBall(it) }
+                        s.bigBalls.forEach { drawThread(s.pivot, it) }
+                        s.bigBalls.forEach { drawPendulumBall(it) }
                         drawPivotCircle(s.pivot) // last, so it sits on top of every thread converging on it
                     }
                 }

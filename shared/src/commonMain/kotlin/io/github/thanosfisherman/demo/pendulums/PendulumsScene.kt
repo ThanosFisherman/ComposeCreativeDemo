@@ -7,6 +7,12 @@ import io.github.thanosfisherman.demo.Star
 import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import io.github.thanosfisherman.demo.generateStars
 import io.github.thanosfisherman.demo.mapRange
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.BIG_PENDULUM_RADIUS
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.LONG_SPEED_MODIFIER_MAX
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.LONG_SPEED_MODIFIER_MIN
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.LONG_THREAD_LENGTH_MAX_FRACTION
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.LONG_THREAD_LENGTH_MIN_FRACTION
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.PENDULUM_RADIUS
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.PIVOT_LINE_Y_FRACTION
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.SPEED_MODIFIER_MAX
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.SPEED_MODIFIER_MIN
@@ -14,19 +20,24 @@ import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.THREAD_LENGTH_MA
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.THREAD_LENGTH_MIN_FRACTION
 import kotlin.math.PI
 import kotlin.math.min
+import kotlin.random.Random
+import kotlin.time.Clock
 
 class PendulumScene(
     val pivot: Offset,
     val balls: List<PendulumBall>,
+    val bigBalls: List<PendulumBall>,
     val stars: List<Star>
 )
 
-fun buildPendulumsScene(size: Size, pendulumCount: Int): PendulumScene {
+fun buildPendulumsScene(size: Size, pendulumCount: Int, bigBallsCount: Int): PendulumScene {
     val count = pendulumCount.coerceAtLeast(1)
+    val bigCount = bigBallsCount.coerceAtLeast(1)
     val pivot = Offset(size.width / 2f, size.height * PIVOT_LINE_Y_FRACTION)
     val referenceDim = min(size.width, size.height)
     val minLength = referenceDim * THREAD_LENGTH_MIN_FRACTION
     val maxLength = referenceDim * THREAD_LENGTH_MAX_FRACTION
+
 
     val balls = List(count) { i ->
         val t = if (count <= 1) 0f else i / (count - 1f)
@@ -47,11 +58,40 @@ fun buildPendulumsScene(size: Size, pendulumCount: Int): PendulumScene {
             speedModifier = speedModifier,
             color = Color.hsv(hue, 0.7f, 1f),
             phase = if (startLeft) PI.toFloat() else 0f,
+            initialRadius = PENDULUM_RADIUS,
+            pitch = notes[noteIndex],
+        )
+    }
+
+    val minLengthLong = referenceDim * LONG_THREAD_LENGTH_MIN_FRACTION
+    val maxLengthLong = referenceDim * LONG_THREAD_LENGTH_MAX_FRACTION
+    val currentTimeMillis = Clock.System.now().toEpochMilliseconds()
+    val random = Random(currentTimeMillis)
+    val bigBalls = List(bigCount) { i ->
+        val t = if (bigCount <= 1) 0f else i / (bigCount - 1f)
+        val threadLength = minLengthLong + (maxLengthLong - minLengthLong) * t
+        val speedModifier = mapRange(
+            0f,
+            (count - 1).coerceAtLeast(1).toFloat(),
+            LONG_SPEED_MODIFIER_MAX,
+            LONG_SPEED_MODIFIER_MIN,
+            i.toFloat()
+        )
+        val hue = t * 50f
+        val notes = MusicIntervals.ONE_FOUR_FIVE_ONE2
+        val noteIndex = i % notes.size
+
+        PendulumBall(
+            threadLength = threadLength,
+            speedModifier = speedModifier,
+            color = Color.hsv(hue, 0.7f, 1f),
+            phase = random.nextFloat() * (PI.toFloat() - 0f) + 0f,
+            initialRadius = BIG_PENDULUM_RADIUS,
             pitch = notes[noteIndex],
         )
     }
 
     val stars = generateStars(size)
 
-    return PendulumScene(pivot = pivot, balls = balls, stars = stars)
+    return PendulumScene(pivot = pivot, balls = balls, bigBalls = bigBalls, stars = stars)
 }

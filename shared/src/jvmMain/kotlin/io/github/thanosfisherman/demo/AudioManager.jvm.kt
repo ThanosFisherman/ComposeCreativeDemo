@@ -33,12 +33,13 @@ class AudioManagerJvm : AudioManager {
         ballsMusic.init()
         pendulumsMusic.init()
 
-        val toneUri = toneUri
-        val bassToneUri = bassToneUri
+        val ballsToneUri = bouncingBallsToneUri
+        val pendulumsUri = pendulumsToneUri
+        val bigPendulumToneUri = bassToneUri
 
-        bouncingBallsSoundId = bouncingBallsSound.loadSound(toneUri)
-        pendulumSoundId = pendulumSound.loadSound(toneUri)
-        bigBallsPendulumSoundId = bigBallsPendulumSound.loadSound(bassToneUri)
+        bouncingBallsSoundId = bouncingBallsSound.loadSound(ballsToneUri)
+        pendulumSoundId = pendulumSound.loadSound(pendulumsUri)
+        bigBallsPendulumSoundId = bigBallsPendulumSound.loadSound(bigPendulumToneUri)
 
         ballsMusic.load(bouncingBallsMusicUri)
         pendulumsMusic.load(pendulumsMusicUri)

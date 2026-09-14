@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.ANGULAR_SPEED_RAD_PER_SEC
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.BIG_ANGULAR_SPEED_RAD_PER_SEC
+import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.BIG_MAX_SWING_DEG
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.GUIDE_LINE_COLOR
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.MAX_SWING_DEG
 import io.github.thanosfisherman.demo.pendulums.PendulumsConfig.PENDULUM_STROKE_WIDTH
@@ -31,16 +33,22 @@ class PendulumsSim(val scene: PendulumScene?) {
         ball: PendulumBall,
         pivot: Offset,
         dt: Float,
-        onCrossedCenter: (Float) -> Unit
+        isBigBall: Boolean,
+        onCrossedCenterSmall: (Float) -> Unit,
+        onCrossedCenterBig: (Float) -> Unit
     ) {
-        ball.phase += dt * ANGULAR_SPEED_RAD_PER_SEC * ball.speedModifier
+        ball.phase += if (isBigBall) dt * BIG_ANGULAR_SPEED_RAD_PER_SEC * ball.speedModifier else dt * ANGULAR_SPEED_RAD_PER_SEC * ball.speedModifier
 
-        val swingRad = MAX_SWING_DEG.toRadians() * cos(ball.phase)
+        val swingRad =
+            if (isBigBall) BIG_MAX_SWING_DEG.toRadians() * cos(ball.phase) else MAX_SWING_DEG.toRadians() * cos(ball.phase)
 
         val crossedCenter = ball.previousSwingRad * swingRad < 0f
         if (crossedCenter) {
             ball.pulse = 1f
-            onCrossedCenter(ball.pitch)
+            if (isBigBall)
+                onCrossedCenterBig(ball.pitch)
+            else
+                onCrossedCenterSmall(ball.pitch)
         }
 
         ball.previousSwingRad = swingRad
@@ -56,7 +64,8 @@ class PendulumsSim(val scene: PendulumScene?) {
         )
     }
 
-    fun update(dt: Float, onCrossedCenter: (Float) -> Unit) {
+
+    fun update(dt: Float, onCrossedCenterSmall: (Float) -> Unit, onCrossedCenterBig: (Float) -> Unit) {
         scene?.let { s ->
             timer += dt
             // 1. Scale / Pitch updates (every 32 seconds)
@@ -70,15 +79,16 @@ class PendulumsSim(val scene: PendulumScene?) {
                     }
 
                     else -> {
-                        scaleLabel = "MAJOR ADD 2 ARPEGGIO"
-                        MusicIntervals.MAJOR_ADD_2_ARPEGGIO
+                        scaleLabel = "DORIAN"
+                        MusicIntervals.DORIAN_SCALE
                     }
                 }
                 s.balls.forEachIndexed { index, ball ->
                     ball.pitch = scale[index % scale.size]
                 }
             }
-            s.balls.forEach { updateBall(it, s.pivot, dt, onCrossedCenter) }
+            s.balls.forEach { updateBall(it, s.pivot, dt, false, onCrossedCenterSmall, onCrossedCenterBig) }
+            s.bigBalls.forEach { updateBall(it, s.pivot, dt, true, onCrossedCenterSmall, onCrossedCenterBig) }
         }
     }
 }

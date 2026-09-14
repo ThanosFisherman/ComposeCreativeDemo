@@ -14,13 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -81,15 +75,20 @@ class MainActivity : ComponentActivity() {
                                 })
                             },
                             Demo("Pendulums") {
-                                LaunchedEffect(Unit) { playOnly(audioManager?.getPendulumsMusic()) }
-                                PendulumsDemo { freq ->
-
+                                LaunchedEffect(Unit) { playOnly(audioManager?.getPendulumsMusic(), volume = 0.4f) }
+                                PendulumsDemo(onCrossedCenterSmall = { freq ->
                                     audioManager?.let {
                                         val id = it.getPendulumsSound().first
                                         val sound = it.getPendulumsSound().second
                                         sound.play(id, 0.35f, freq)
                                     }
-                                }
+                                }, onCrossedCenterBig = { freq ->
+                                    audioManager?.let {
+                                        val id = it.getBigBallsPendulumsSound().first
+                                        val sound = it.getBigBallsPendulumsSound().second
+                                        sound.play(id, 0.78f, freq)
+                                    }
+                                })
                             },
                         )
                     )

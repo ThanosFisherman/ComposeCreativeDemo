@@ -37,14 +37,15 @@ class AudioManagerAndroid(
         ballsMusic.init()
         pendulumsMusic.init()
 
-        val toneUri = toneUri
-        val bassToneUri = bassToneUri
+        val ballsToneUri = bouncingBallsToneUri
+        val pendulumsUri = pendulumsToneUri
+        val bigPendulumToneUri = bassToneUri
 
-        bouncingBallsSoundId = bouncingBallsSound.loadSound(toneUri)
+        bouncingBallsSoundId = bouncingBallsSound.loadSound(ballsToneUri)
 
-        pendulumSoundId = pendulumSound.loadSound(toneUri)
+        pendulumSoundId = pendulumSound.loadSound(pendulumsUri)
 
-        bigBallsPendulumSoundId = bigBallsPendulumSound.loadSound(bassToneUri)
+        bigBallsPendulumSoundId = bigBallsPendulumSound.loadSound(bigPendulumToneUri)
 
         ballsMusic.load(bouncingBallsMusicUri)
 
