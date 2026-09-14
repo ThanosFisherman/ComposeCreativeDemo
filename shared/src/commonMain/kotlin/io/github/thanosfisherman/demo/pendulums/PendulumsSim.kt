@@ -26,7 +26,7 @@ class PendulumsSim(val scene: PendulumScene?) {
 
     var timer = 0f
     var currentScaleIndex = -1
-    var scaleLabel = "TRITONE SCALE"
+    var scaleLabel = ""
 
     private fun updateBall(
         ball: PendulumBall,
@@ -66,14 +66,12 @@ class PendulumsSim(val scene: PendulumScene?) {
                 currentScaleIndex = scaleIndex
                 val scale = when (scaleIndex) {
                     0 -> {
-                        scaleLabel = "MAJOR PENTATONIC SCALE"
-                        println("MAJOR PENTATONIC SCALE")
+                        scaleLabel = "MAJOR PENTATONIC"
                         MusicIntervals.MAJOR_PENTATONIC_SCALE
                     }
 
                     else -> {
                         scaleLabel = "MAJOR ADD 2 ARPEGGIO"
-                        println("MAJOR ADD 2 ARPEGGIO")
                         MusicIntervals.MAJOR_ADD_2_ARPEGGIO
                     }
                 }
