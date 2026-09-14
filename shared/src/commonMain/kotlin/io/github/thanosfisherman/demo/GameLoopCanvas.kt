@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import kotlinx.coroutines.isActive
 import kotlin.math.roundToInt
 
-/** Observable game-loop stats — read `fps`/`frameCount`/`lastDeltaSeconds` from anywhere in your composition. */
+/** Observable game-loop stats — read `fps`/`frameCount`/`lastDeltaSeconds` from anywhere. */
 @Stable
 class GameLoopState internal constructor() {
     /** Recomputed once per second from actual measured frame times — see GameLoopCanvas's doc for why. */
@@ -30,16 +30,13 @@ fun rememberGameLoopState(): GameLoopState = remember { GameLoopState() }
 /**
  * A Canvas that drives itself with a delta-time game loop.
  *
- * @param maxDeltaSeconds clamps the per-frame delta passed to [onUpdate] — protects your own
+ * @param maxDeltaSeconds clamps the per-frame delta passed to [onUpdate] protects your own
  *   update logic from a single bad frame (a stall, a backgrounded tab) suddenly reporting a huge
  *   dt and causing a visible jump. This does NOT affect [GameLoopState.fps], which is measured
- *   from the real, unclamped frame times — same "physics safety clamp vs. honest measurement"
- *   split BouncingBallsInVGame's own loop used.
- * @param gameLoopState hoist this yourself (via [rememberGameLoopState]) if you need to read
+ *   from the real, unclamped frame times.
+ * @param gameLoopState can be hoisted (via [rememberGameLoopState]) if needed, to read
  *   fps/frameCount from elsewhere in your composition, e.g. a debug overlay.
  * @param onUpdate called once per frame, before [onDraw], with the clamped delta in seconds.
- *   Mutate whatever plain (non-Compose-state) objects your demo owns here — same pattern as
- *   BouncingBallsInVGame's Ball objects being mutated in updateBall and read back in drawBall.
  * @param onDraw called once per frame, after [onUpdate], to render the current state.
  */
 @Composable

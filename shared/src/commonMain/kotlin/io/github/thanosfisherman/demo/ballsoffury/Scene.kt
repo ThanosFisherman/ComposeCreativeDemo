@@ -8,7 +8,7 @@ import io.github.thanosfisherman.demo.audioUtils.MusicIntervals
 import io.github.thanosfisherman.demo.mapRange
 import io.github.thanosfisherman.demo.wallXAtY
 
-data class Scene(val walls: List<Wall>, val balls: List<Ball>)
+data class Scene(val walls: List<Wall>, val bouncingBalls: List<BouncingBall>)
 
 
 fun buildScene(size: Size, ballCount: Int): Scene {
@@ -33,7 +33,7 @@ fun buildScene(size: Size, ballCount: Int): Scene {
     val ampMax = size.height * Config.AMPLITUDE_MAX_FRACTION
     val ampMin = size.height * Config.AMPLITUDE_MIN_FRACTION
 
-    val balls = List(count) { i ->
+    val bouncingBalls = List(count) { i ->
         val t = if (count <= 1) 0f else i / (count - 1f)
         val rowY = firstRowY + i * Config.ROW_SPACING
 
@@ -41,7 +41,7 @@ fun buildScene(size: Size, ballCount: Int): Scene {
         val rightBound = wallXAtY(rightWall, rowY) - Config.PARTICLE_RADIUS
         val notes = MusicIntervals.TRITONE_SCALE
         val noteIndex = i % notes.size
-        Ball(
+        BouncingBall(
             startingX = leftBound,
             finalX = rightBound,
             startingY = rowY,
@@ -58,5 +58,5 @@ fun buildScene(size: Size, ballCount: Int): Scene {
         )
     }
 
-    return Scene(listOf(leftWall, rightWall), balls)
+    return Scene(listOf(leftWall, rightWall), bouncingBalls)
 }

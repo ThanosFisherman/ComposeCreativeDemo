@@ -27,30 +27,30 @@ import kotlin.math.min
 private val VIRTUAL_SIZE_LANDSCAPE = Size(1024f, 480f)
 private val VIRTUAL_SIZE_PORTRAIT = Size(480f, 1024f)
 
-private fun updateBall(ball: Ball, dt: Float, onBounce: (Float) -> Unit) {
-    if (ball.forward) {
-        ball.angle += dt * Config.ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
-        if (ball.angle > 180f) {
-            ball.angle = 180f - (ball.angle - 180f) // mirror back into range
-            ball.forward = false
-            ball.pulse = 1f
-            onBounce(ball.pitch)
+private fun updateBall(bouncingBall: BouncingBall, dt: Float, onBounce: (Float) -> Unit) {
+    if (bouncingBall.forward) {
+        bouncingBall.angle += dt * Config.ANGULAR_SPEED_DEG_PER_SEC * bouncingBall.speedModifier
+        if (bouncingBall.angle > 180f) {
+            bouncingBall.angle = 180f - (bouncingBall.angle - 180f) // mirror back into range
+            bouncingBall.forward = false
+            bouncingBall.pulse = 1f
+            onBounce(bouncingBall.pitch)
         }
     } else {
-        ball.angle -= dt * Config.ANGULAR_SPEED_DEG_PER_SEC * ball.speedModifier
-        if (ball.angle < 0f) {
-            ball.angle = -ball.angle // mirror back into range
-            ball.forward = true
-            ball.pulse = 1f
-            onBounce(ball.pitch)
+        bouncingBall.angle -= dt * Config.ANGULAR_SPEED_DEG_PER_SEC * bouncingBall.speedModifier
+        if (bouncingBall.angle < 0f) {
+            bouncingBall.angle = -bouncingBall.angle // mirror back into range
+            bouncingBall.forward = true
+            bouncingBall.pulse = 1f
+            onBounce(bouncingBall.pitch)
         }
     }
 
-    val x = mapRange(0f, 180f, ball.startingX, ball.finalX, ball.angle)
-    val y = ball.startingY - sinDeg(ball.angle) * ball.amplitude // minus: arc bulges upward
-    ball.position = Offset(x, y)
+    val x = mapRange(0f, 180f, bouncingBall.startingX, bouncingBall.finalX, bouncingBall.angle)
+    val y = bouncingBall.startingY - sinDeg(bouncingBall.angle) * bouncingBall.amplitude // minus: arc bulges upward
+    bouncingBall.position = Offset(x, y)
 
-    ball.pulse = max(0f, ball.pulse - dt * Config.PULSE_DECAY_PER_SEC)
+    bouncingBall.pulse = max(0f, bouncingBall.pulse - dt * Config.PULSE_DECAY_PER_SEC)
 }
 
 private fun DrawScope.drawBackground() {
@@ -63,21 +63,21 @@ private fun DrawScope.drawWall(wall: Wall) {
 
 /** Connects consecutive balls' centers — since each ball moves independently, this segment's
  *  length naturally contracts/expands frame to frame as the balls drift apart or together. */
-private fun DrawScope.drawChainLines(balls: List<Ball>) {
-    for (i in 0 until balls.size - 1) {
+private fun DrawScope.drawChainLines(bouncingBalls: List<BouncingBall>) {
+    for (i in 0 until bouncingBalls.size - 1) {
         drawLine(
             color = Config.CHAIN_LINE_COLOR,
-            start = balls[i].position,
-            end = balls[i + 1].position,
+            start = bouncingBalls[i].position,
+            end = bouncingBalls[i + 1].position,
             strokeWidth = 2f,
         )
     }
 }
 
-private fun DrawScope.drawBall(ball: Ball) {
-    val radius = Config.PARTICLE_RADIUS * (1f + ball.pulse * 0.3f)
+private fun DrawScope.drawBall(bouncingBall: BouncingBall) {
+    val radius = Config.PARTICLE_RADIUS * (1f + bouncingBall.pulse * 0.3f)
 
-    val glowRadius = radius * (1.5f + ball.pulse * 0.8f)
+    val glowRadius = radius * (1.5f + bouncingBall.pulse * 0.8f)
     val innerRadius = radius - Config.BALL_STROKE_WIDTH / 2f
     val outerRadius = radius + Config.BALL_STROKE_WIDTH / 2f
 
@@ -86,17 +86,17 @@ private fun DrawScope.drawBall(ball: Ball) {
             colorStops = arrayOf(
                 0f to Color.Transparent,
                 (innerRadius / glowRadius) to Color.Transparent,
-                (outerRadius / glowRadius) to ball.color.copy(alpha = 0.55f + ball.pulse * 0.3f),
+                (outerRadius / glowRadius) to bouncingBall.color.copy(alpha = 0.55f + bouncingBall.pulse * 0.3f),
                 1f to Color.Transparent,
             ),
-            center = ball.position,
+            center = bouncingBall.position,
             radius = glowRadius,
         ),
         radius = glowRadius,
-        center = ball.position,
+        center = bouncingBall.position,
     )
 
-    drawCircle(color = ball.color, radius = radius, center = ball.position, style = Config.BALL_STROKE)
+    drawCircle(color = bouncingBall.color, radius = radius, center = bouncingBall.position, style = Config.BALL_STROKE)
 }
 
 // ---------- Composable ----------
@@ -148,7 +148,7 @@ fun BouncingBallsInVGame(
                                 MusicIntervals.WHOLE_TONE_SCALE
                             }
                         }
-                        s.balls.forEachIndexed { index, ball ->
+                        s.bouncingBalls.forEachIndexed { index, ball ->
                             ball.pitch = scale[index % scale.size]
                         }
                     }
@@ -164,7 +164,7 @@ fun BouncingBallsInVGame(
                         }
                     }
 
-                    s.balls.forEach { updateBall(it, dt, onBounce) }
+                    s.bouncingBalls.forEach { updateBall(it, dt, onBounce) }
                 }
             },
             onDraw = {
@@ -183,8 +183,8 @@ fun BouncingBallsInVGame(
                 translate(left = offsetX, top = offsetY) {
                     scale(fitScale, fitScale, pivot = Offset.Zero) {
                         s.walls.forEach { drawWall(it) }
-                        drawChainLines(s.balls)
-                        for (ball in s.balls) { drawBall(ball) } // last, so balls render on top of walls/lines
+                        drawChainLines(s.bouncingBalls)
+                        for (ball in s.bouncingBalls) { drawBall(ball) } // last, so balls render on top of walls/lines
                     }
                 }
             },

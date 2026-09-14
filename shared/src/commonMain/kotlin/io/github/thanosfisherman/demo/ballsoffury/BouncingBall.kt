@@ -3,7 +3,7 @@ package io.github.thanosfisherman.demo.ballsoffury
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 
-data class Ball(
+data class BouncingBall(
     val startingX: Float,
     val finalX: Float,
     val startingY: Float,
