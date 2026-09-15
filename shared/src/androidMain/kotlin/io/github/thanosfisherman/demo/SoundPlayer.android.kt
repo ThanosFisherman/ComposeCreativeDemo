@@ -42,7 +42,7 @@ class SoundPlayer(private val context: Context) : Sound {
      * Loads a short sound effect.
      *
      * @param path a Compose Multiplatform resource URI from Res.getUri(...),
-     *             e.g. "file:///android_asset/composeResources/.../files/sounds/Tone3.wav"
+     *             e.g. "file:///android_asset/composeResources/.../files/sounds/tone3.wav"
      */
     override fun loadSound(path: String): Int {
         check(!disposed.get()) { "SoundPlayer has been disposed" }

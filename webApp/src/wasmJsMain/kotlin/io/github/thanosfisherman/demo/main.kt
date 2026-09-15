@@ -44,7 +44,7 @@ fun main() {
             DemoNavigator(
                 demos = listOf(
                     Demo("Pendulums") {
-                        LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic(), volume = 0.4f) }
+                        LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic(), volume = 0.6f) }
                         PendulumsDemo(onCrossedCenterSmall = { freq ->
                             val id = audioManager.getPendulumsSound().first
                             val sound = audioManager.getPendulumsSound().second

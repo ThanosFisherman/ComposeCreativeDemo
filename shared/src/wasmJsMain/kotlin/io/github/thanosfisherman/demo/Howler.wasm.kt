@@ -25,6 +25,6 @@ internal fun howlOptions(
     src: String,
     loop: Boolean,
     volume: Double,
-    pool: Int = 32
+    pool: Int = 10
 ): JsAny =
     js("({ src: [src], loop: loop, volume: volume, pool: pool })")

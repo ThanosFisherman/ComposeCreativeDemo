@@ -8,15 +8,15 @@ import io.github.thanosfisherman.demo.audioUtils.Sound
 interface AudioManager : Disposable{
 
     val bouncingBallsToneUri: String
-        get() = Res.getUri("files/sounds/Tone2.wav")
+        get() = Res.getUri("files/sounds/tone2.wav")
     val pendulumsToneUri: String
-        get() = Res.getUri("files/sounds/Tone2.wav")
+        get() = Res.getUri("files/sounds/tone2.wav")
     val bassToneUri: String
-        get() = Res.getUri("files/sounds/Bass_Tone.wav")
+        get() = Res.getUri("files/sounds/bass_tone.wav")
     val bouncingBallsMusicUri: String
-        get() = Res.getUri("files/music/Epic_Ballz_backing.ogg")
+        get() = Res.getUri("files/music/epic_ballz_backing.ogg")
     val pendulumsMusicUri: String
-        get() = Res.getUri("files/music/E_Pads.ogg")
+        get() = Res.getUri("files/music/epads.ogg")
 
     val allMusic: List<Music>
     val allSounds: List<Sound>
