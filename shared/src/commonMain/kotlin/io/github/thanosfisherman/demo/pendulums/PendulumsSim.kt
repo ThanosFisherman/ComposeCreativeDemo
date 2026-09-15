@@ -1,5 +1,8 @@
 package io.github.thanosfisherman.demo.pendulums
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -27,7 +30,8 @@ class PendulumsSim(val scene: PendulumScene?) {
 
     var timer = 0f
     var currentScaleIndex = -1
-    var scaleLabel = ""
+    var scaleLabel: String by mutableStateOf("")
+        private set
 
     private fun updateBall(
         ball: PendulumBall,

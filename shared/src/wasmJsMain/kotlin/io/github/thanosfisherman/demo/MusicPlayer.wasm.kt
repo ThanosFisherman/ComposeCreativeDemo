@@ -14,7 +14,7 @@ class MusicPlayer : Music {
 
     override fun load(path: String) {
         stop()
-        howl = Howl(howlOptions(src = path, loop = true, volume = 1.0))
+        howl = Howl(howlOptions(src = path, loop = true, volume = 1.0, html5 = true))
     }
 
     override fun play(loop: Boolean, volume: Float) {

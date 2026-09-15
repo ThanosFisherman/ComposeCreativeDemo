@@ -83,7 +83,7 @@ fun PendulumsDemo(
         ) {
             BasicText(text = "Pendulums - Thanos Psaridis", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
             BasicText(text = "FPS: ${gameLoopState.fps}", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
-            BasicText(text = "SCALE: ${pendulumSim?.scaleLabel}", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
+            BasicText(text = "SCALE: ${pendulumSim?.scaleLabel ?: ""}", style = BouncingBallsConfig.DEBUG_TEXT_STYLE)
         }
     }
 }
