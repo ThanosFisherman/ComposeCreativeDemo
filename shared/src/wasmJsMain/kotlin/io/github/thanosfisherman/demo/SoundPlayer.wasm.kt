@@ -20,7 +20,7 @@ class SoundPlayer : Sound {
                 src = path,
                 loop = false,
                 volume = 1.0,
-                pool = 32
+                pool = 16
             )
         )
 
