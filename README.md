@@ -28,7 +28,7 @@ A little **Kotlin-Compose Multiplatform** playground featuring a growing set of 
 
 Kotlin Multiplatform, Compose Multiplatform's Canvas API, and a hand-rolled `GameLoopCanvas`, a small reusable `withFrameNanos` + delta-time game loop that gives every new demo frame timing and FPS tracking for free, instead of reimplementing it each time.
 
-Audio is genuinely three different stacks under one shared interface: **Howler.js** on web (for real pitch control via Web Audio's playback rate), **LWJGL + OpenAL** with hand-rolled OGG streaming on desktop, and **SoundPool** on Android plus entirely too much trial and error getting all three to preload correctly and loop correctly.
+Audio is genuinely three different stacks under one shared interface: **Howler.js** on web, **LWJGL + OpenAL** with hand-rolled OGG streaming on desktop, and **SoundPool** on Android plus entirely too much trial and error getting all three to preload correctly and loop correctly.
 
 ## Screenshot
 
