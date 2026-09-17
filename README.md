@@ -21,7 +21,7 @@ A little **Kotlin-Compose Multiplatform** playground featuring a growing set of 
 ### Shared across both
 
 - **A fixed virtual viewport** (borrowed straight from libGDX's `FitViewport`) keeps each scene's proportions locked, whether you're rotating a phone into portrait or dragging a desktop window around.
-- **A debug overlay** shows the title, live FPS, and whatever else is demo-specific — like which scale is currently playing.
+- **A debug overlay** shows the title, live FPS, and whatever else is demo-specific, like which scale is currently playing.
 - The same code runs, unchanged, on **Android (APK)**, **desktop (a cross-platform fat JAR)**, and the **web (Kotlin/Wasm)** thanks to Compose Multiplatform. Check the Releases tab for downloadable builds.
 
 ## Built with
