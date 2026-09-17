@@ -8,3 +8,7 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
 }
+// disable if error with lock files
+tasks.matching { it.name == "kotlinWasmUpgradePackageLock" }.configureEach {
+    enabled = true
+}
