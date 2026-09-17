@@ -39,6 +39,7 @@ class MusicPlayer(
     var scope: CoroutineScope? = null
 
     override fun init() {
+        OpenALAudioEngine.retain()
         source = alGenSources()
         alGenBuffers(streamBuffers)
     }
@@ -90,6 +91,7 @@ class MusicPlayer(
 
     override fun play(loop: Boolean, volume: Float) {
         require(decoder != 0L) { "No track loaded — call load() first" }
+        OpenALAudioEngine.makeContextCurrent()
         stop()
         this.loop = loop
         alSourcef(source, AL_GAIN, volume.coerceAtLeast(0f))
@@ -111,6 +113,7 @@ class MusicPlayer(
 
     override fun update() {
         if (!playing) return
+        OpenALAudioEngine.makeContextCurrent()
         val processed = alGetSourcei(source, AL_BUFFERS_PROCESSED)
         repeat(processed) {
             val buf = alSourceUnqueueBuffers(source)
@@ -132,6 +135,7 @@ class MusicPlayer(
     override fun stop() {
         playing = false
         if (source != 0) {
+            OpenALAudioEngine.makeContextCurrent()
             alSourceStop(source)
             val queued = alGetSourcei(source, AL_BUFFERS_QUEUED)
             if (queued > 0) {
@@ -174,7 +178,12 @@ class MusicPlayer(
     override fun dispose() {
         stop()
         releaseDecoder()
-        if (source != 0) alDeleteSources(source)
+        if (source != 0) {
+            OpenALAudioEngine.makeContextCurrent()
+            alDeleteSources(source)
+            source = 0
+        }
         alDeleteBuffers(streamBuffers)
+        OpenALAudioEngine.release()
     }
 }

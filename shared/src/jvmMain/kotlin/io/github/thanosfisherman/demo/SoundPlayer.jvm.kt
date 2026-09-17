@@ -1,10 +1,7 @@
 package io.github.thanosfisherman.demo
 
 import io.github.thanosfisherman.demo.audioUtils.Sound
-import org.lwjgl.openal.AL
 import org.lwjgl.openal.AL10.*
-import org.lwjgl.openal.ALC
-import org.lwjgl.openal.ALC10
 import org.lwjgl.system.MemoryUtil
 import java.io.BufferedInputStream
 import java.io.File
@@ -19,9 +16,6 @@ class SoundPlayer(
     sourcePoolSize: Int = 24
 ) : Sound {
 
-    private var device: Long = 0
-    private var context: Long = 0
-
     private val sourcePool = IntArray(sourcePoolSize.coerceAtLeast(1))
     private var nextSource = 0
 
@@ -34,24 +28,7 @@ class SoundPlayer(
     }
 
     override fun init() {
-        val defaultDeviceName = ALC10.alcOpenDevice(null as CharSequence?)
-        device = defaultDeviceName
-
-        require(device != 0L) {
-            "Failed to open default OpenAL device"
-        }
-
-        val attribs = intArrayOf(0)
-
-        context = ALC10.alcCreateContext(device, attribs)
-        require(context != 0L) {
-            "Failed to create OpenAL context"
-        }
-
-        ALC10.alcMakeContextCurrent(context)
-
-        val alcCapabilities = ALC.createCapabilities(device)
-        AL.createCapabilities(alcCapabilities)
+        OpenALAudioEngine.retain()
 
         for (i in sourcePool.indices) {
             sourcePool[i] = alGenSources()
@@ -180,6 +157,7 @@ class SoundPlayer(
         pitch: Float
     ) {
         playbackExecutor.execute {
+            OpenALAudioEngine.makeContextCurrent()
             val source = findAvailableSource()
 
             // Only stop if this source is still playing.
@@ -219,22 +197,24 @@ class SoundPlayer(
 
     override fun dispose() {
         playbackExecutor.execute {
+            OpenALAudioEngine.makeContextCurrent()
             sourcePool.forEach { source ->
-                alSourceStop(source)
-                alDeleteSources(source)
+                if (source != 0) {
+                    alSourceStop(source)
+                    alDeleteSources(source)
+                }
             }
 
             bufferCache.values.forEach { buffer ->
-                alDeleteBuffers(buffer)
+                if (buffer != 0) {
+                    alDeleteBuffers(buffer)
+                }
             }
 
             bufferCache.clear()
 
-            ALC10.alcMakeContextCurrent(0)
-            ALC10.alcDestroyContext(context)
-            ALC10.alcCloseDevice(device)
+            OpenALAudioEngine.release()
         }
-
         playbackExecutor.shutdown()
     }
 }
