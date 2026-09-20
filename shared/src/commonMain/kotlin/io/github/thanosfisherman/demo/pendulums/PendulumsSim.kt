@@ -68,7 +68,6 @@ class PendulumsSim(val scene: PendulumScene?) {
         )
     }
 
-
     fun update(dt: Float, onCrossedCenterSmall: (Float) -> Unit, onCrossedCenterBig: (Float) -> Unit) {
         scene?.let { s ->
             timer += dt
