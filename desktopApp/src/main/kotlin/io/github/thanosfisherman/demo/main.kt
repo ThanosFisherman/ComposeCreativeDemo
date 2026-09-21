@@ -26,6 +26,7 @@ import androidx.compose.ui.window.application
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
+import io.github.thanosfisherman.demo.swarm.SwarmDemo
 
 fun main() = application {
 
@@ -61,6 +62,16 @@ fun main() = application {
             } else {
                 DemoNavigator(
                     demos = listOf(
+                        Demo("Swarm") {
+                            LaunchedEffect(Unit) {
+                                audioManager.allMusic.forEach { it.stop() }
+                            }
+                            SwarmDemo {freq->
+                                val id = audioManager.getPendulumsSound().first
+                                val sound = audioManager.getPendulumsSound().second
+                                sound.play(id, 0.34f, freq)
+                            }
+                        },
                         Demo("Pendulums") {
                             LaunchedEffect(Unit) {
                                 playOnly(audioManager.getPendulumsMusic(), volume = 0.4f)

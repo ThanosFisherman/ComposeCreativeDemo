@@ -170,6 +170,146 @@ object MusicIntervals {
         OCTAVE_2
     )
 
+    val HARMONIC_MINOR_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MAJOR_SIXTH_0,
+        PERFECT_FIFTH_0,
+        PERFECT_FOURTH_0,
+        MAJOR_THIRD_0,
+        MINOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MINOR_THIRD_1,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        MINOR_SIXTH_1,
+        MAJOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
+    val HARMONIC_MAJOR_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MINOR_SIXTH_0,
+        PERFECT_FIFTH_0,
+        PERFECT_FOURTH_0,
+        MAJOR_THIRD_0,
+        MINOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MAJOR_THIRD_1,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        MINOR_SIXTH_1,
+        MAJOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
+    //fourth mode of harmonic major
+    val LYDIAN_B3_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MAJOR_SIXTH_0,
+        TRITONE_0,
+        PERFECT_FOURTH_0,
+        MINOR_THIRD_0,
+        MINOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MINOR_THIRD_1,
+        TRITONE_1,
+        PERFECT_FIFTH_1,
+        MAJOR_SIXTH_1,
+        MAJOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
+    val DOUBLE_HARMONIC_MAJOR = floatArrayOf(
+        OCTAVE_0,
+        MAJOR_SEVENTH_0,
+        MINOR_SIXTH_0,
+        PERFECT_FIFTH_0,
+        PERFECT_FOURTH_0,
+        MAJOR_THIRD_0,
+        MINOR_SECOND_0,
+        UNISON,
+        MINOR_SECOND_1,
+        MAJOR_THIRD_1,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        MINOR_SIXTH_1,
+        MAJOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
+    val MELODIC_MINOR_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MAJOR_SIXTH_0,
+        PERFECT_FIFTH_0,
+        PERFECT_FOURTH_0,
+        MINOR_THIRD_0,
+        MINOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MINOR_THIRD_1,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        MAJOR_SIXTH_1,
+        MAJOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
+    val MIXOLYDIAN_B6_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MINOR_SIXTH_0,
+        PERFECT_FIFTH_0,
+        PERFECT_FOURTH_0,
+        MAJOR_THIRD_0,
+        MAJOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MAJOR_THIRD_1,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        MINOR_SIXTH_1,
+        MINOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
+    val MIXOLYDIAN_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MINOR_SIXTH_0,
+        PERFECT_FIFTH_0,
+        PERFECT_FOURTH_0,
+        MINOR_THIRD_0,
+        MAJOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MAJOR_THIRD_1,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        MAJOR_SIXTH_1,
+        MINOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
+    val INDIAN_PENTATONIC_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SIXTH_0,
+        PERFECT_FIFTH_0,
+        PERFECT_FOURTH_0,
+        MAJOR_SECOND_0,
+        UNISON,
+        MAJOR_THIRD_1,
+        PERFECT_FOURTH_1,
+        PERFECT_FIFTH_1,
+        MINOR_SEVENTH_1,
+        OCTAVE_1
+    )
 
     val MAJOR_SCALE: FloatArray = floatArrayOf(
         OCTAVE_0,
@@ -207,7 +347,7 @@ object MusicIntervals {
         OCTAVE_1
     )
 
-    val HIRAJOSHI_SCALE: FloatArray = floatArrayOf(
+    val HIRAJOSHI_SCALE = floatArrayOf(
         OCTAVE_0,
         MINOR_SEVENTH_0,
         MAJOR_SIXTH_0,
@@ -260,6 +400,20 @@ object MusicIntervals {
         MAJOR_SECOND_1,
         MAJOR_THIRD_1,
         PERFECT_FIFTH_1,
+        OCTAVE_1
+    )
+
+    val MINOR_ADD_2_6_ARPEGGIO: FloatArray = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MAJOR_SIXTH_0,
+        PERFECT_FOURTH_0,
+        MINOR_THIRD_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MINOR_THIRD_1,
+        PERFECT_FIFTH_1,
+        MAJOR_SIXTH_1,
         OCTAVE_1
     )
 
