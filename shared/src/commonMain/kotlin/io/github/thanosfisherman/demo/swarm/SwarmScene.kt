@@ -26,7 +26,7 @@ fun buildSwarmScene(size: Size, ballCount: Int): SwarmScene {
     val boundaryRadius = min(size.width, size.height) * BOUNDARY_RADIUS_FRACTION
 
     val random = Random(STAR_SEED) // reuse the same fixed seed as the star field, for a reproducible layout
-    val notes = MusicIntervals.MAJOR_SCALE
+    val notes = MusicIntervals.MAJOR_ADD_2_ARPEGGIO
 
     val balls = List(count) { i ->
         val ballRadius =

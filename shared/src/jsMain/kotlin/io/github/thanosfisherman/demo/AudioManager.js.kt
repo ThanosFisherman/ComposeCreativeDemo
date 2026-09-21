@@ -18,6 +18,10 @@ class AudioManagerJs : AudioManager {
         TODO("Not yet implemented")
     }
 
+    override fun getSwarmSound(): Pair<Int, Sound> {
+        TODO("Not yet implemented")
+    }
+
     override fun getBouncingBallsMusic(): Music {
         TODO("Not yet implemented")
     }

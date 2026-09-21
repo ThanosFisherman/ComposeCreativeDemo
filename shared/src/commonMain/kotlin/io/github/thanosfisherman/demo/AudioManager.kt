@@ -5,7 +5,7 @@ import io.github.thanosfisherman.demo.audioUtils.Disposable
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.audioUtils.Sound
 
-interface AudioManager : Disposable{
+interface AudioManager : Disposable {
 
     val bouncingBallsToneUri: String
         get() = Res.getUri("files/sounds/tone2.wav")
@@ -13,6 +13,8 @@ interface AudioManager : Disposable{
         get() = Res.getUri("files/sounds/tone2.wav")
     val bassToneUri: String
         get() = Res.getUri("files/sounds/bass_tone.wav")
+    val swarmToneUri: String
+        get() = Res.getUri("files/sounds/tone.wav")
     val bouncingBallsMusicUri: String
         get() = Res.getUri("files/music/epic_ballz_backing.ogg")
     val pendulumsMusicUri: String
@@ -22,6 +24,7 @@ interface AudioManager : Disposable{
     val allSounds: List<Sound>
     fun init()
     fun getBouncingBallsSound(): Pair<Int, Sound>
+    fun getSwarmSound(): Pair<Int, Sound>
     fun getBouncingBallsMusic(): Music
     fun getPendulumsSound(): Pair<Int, Sound>
     fun getBigBallsPendulumsSound(): Pair<Int, Sound>

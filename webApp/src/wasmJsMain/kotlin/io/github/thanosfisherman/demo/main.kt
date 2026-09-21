@@ -20,6 +20,7 @@ import androidx.compose.ui.window.ComposeViewport
 import io.github.thanosfisherman.demo.audioUtils.Music
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
+import io.github.thanosfisherman.demo.swarm.SwarmDemo
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.events.Event
@@ -43,6 +44,16 @@ fun main() {
         } else {
             DemoNavigator(
                 demos = listOf(
+                    Demo("Swarm") {
+                        LaunchedEffect(Unit) {
+                            audioManager.allMusic.forEach { it.stop() }
+                        }
+                        SwarmDemo { freq ->
+                            val id = audioManager.getSwarmSound().first
+                            val sound = audioManager.getSwarmSound().second
+                            sound.play(id, 0.34f, freq)
+                        }
+                    },
                     Demo("Pendulums") {
                         LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic(), volume = 0.6f) }
                         PendulumsDemo(onCrossedCenterSmall = { freq ->

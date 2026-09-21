@@ -67,8 +67,8 @@ fun main() = application {
                                 audioManager.allMusic.forEach { it.stop() }
                             }
                             SwarmDemo {freq->
-                                val id = audioManager.getPendulumsSound().first
-                                val sound = audioManager.getPendulumsSound().second
+                                val id = audioManager.getSwarmSound().first
+                                val sound = audioManager.getSwarmSound().second
                                 sound.play(id, 0.34f, freq)
                             }
                         },

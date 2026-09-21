@@ -33,8 +33,8 @@ class SwarmSim(val size: Size, val swarmScene: SwarmScene?) {
                 val rand = (0..2).random()
                 val scale = when (rand) {
                     0 -> {
-                        scaleLabel = "MAJOR PENTATONIC I"
-                        MusicIntervals.MAJOR_PENTATONIC_SCALE
+                        scaleLabel = "MAJOR ADD 2 ARPEGGIO I"
+                        MusicIntervals.MAJOR_ADD_2_ARPEGGIO
                     }
 
                     1 -> {
