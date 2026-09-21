@@ -51,7 +51,7 @@ fun main() {
                         SwarmDemo { freq ->
                             val id = audioManager.getSwarmSound().first
                             val sound = audioManager.getSwarmSound().second
-                            sound.play(id, 0.34f, freq)
+                            sound.play(id, 0.62f, freq)
                         }
                     },
                     Demo("Pendulums") {
@@ -59,11 +59,11 @@ fun main() {
                         PendulumsDemo(onCrossedCenterSmall = { freq ->
                             val id = audioManager.getPendulumsSound().first
                             val sound = audioManager.getPendulumsSound().second
-                            sound.play(id, 0.35f, freq)
+                            sound.play(id, 0.68f, freq)
                         }, onCrossedCenterBig = { freq ->
                             val id = audioManager.getBigBallsPendulumsSound().first
                             val sound = audioManager.getBigBallsPendulumsSound().second
-                            sound.play(id, 0.78f, freq)
+                            sound.play(id, 0.86f, freq)
                         })
                     },
                     Demo("The balls of Fury") {
@@ -71,7 +71,7 @@ fun main() {
                         BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
                             val id = audioManager.getBouncingBallsSound().first
                             val sound = audioManager.getBouncingBallsSound().second
-                            sound.play(id, 0.35f, freq)
+                            sound.play(id, 0.42f, freq)
                         })
                     }
                 )

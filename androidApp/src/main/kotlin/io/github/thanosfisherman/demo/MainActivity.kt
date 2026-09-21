@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
                                 SwarmDemo { freq ->
                                     val id = audioManager.getSwarmSound().first
                                     val sound = audioManager.getSwarmSound().second
-                                    sound.play(id, 0.34f, freq)
+                                    sound.play(id, 0.62f, freq)
                                 }
                             },
                             Demo("Pendulums") {
@@ -81,13 +81,13 @@ class MainActivity : ComponentActivity() {
                                     audioManager?.let {
                                         val id = it.getPendulumsSound().first
                                         val sound = it.getPendulumsSound().second
-                                        sound.play(id, 0.35f, freq)
+                                        sound.play(id, 0.68f, freq)
                                     }
                                 }, onCrossedCenterBig = { freq ->
                                     audioManager?.let {
                                         val id = it.getBigBallsPendulumsSound().first
                                         val sound = it.getBigBallsPendulumsSound().second
-                                        sound.play(id, 0.78f, freq)
+                                        sound.play(id, 0.86f, freq)
                                     }
                                 })
                             },
@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
                                     audioManager?.let {
                                         val id = it.getBouncingBallsSound().first
                                         val sound = it.getBouncingBallsSound().second
-                                        sound.play(id, 0.35f, freq)
+                                        sound.play(id, 0.42f, freq)
                                     }
                                 })
                             }
