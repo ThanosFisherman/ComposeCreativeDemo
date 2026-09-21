@@ -83,7 +83,7 @@ fun main() = application {
                             }, onCrossedCenterBig = { freq ->
                                 val id = audioManager.getBigBallsPendulumsSound().first
                                 val sound = audioManager.getBigBallsPendulumsSound().second
-                                sound.play(id, 0.86f, freq)
+                                sound.play(id, 0.88f, freq)
                             })
                         },
                         Demo("The balls of Fury") {

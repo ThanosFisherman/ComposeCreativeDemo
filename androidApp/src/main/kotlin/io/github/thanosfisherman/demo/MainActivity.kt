@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             Demo("Pendulums") {
-                                LaunchedEffect(Unit) { playOnly(audioManager?.getPendulumsMusic(), volume = 0.4f) }
+                                LaunchedEffect(Unit) { playOnly(audioManager?.getPendulumsMusic(), volume = 0.5f) }
                                 PendulumsDemo(onCrossedCenterSmall = { freq ->
                                     audioManager?.let {
                                         val id = it.getPendulumsSound().first
@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
                                     audioManager?.let {
                                         val id = it.getBigBallsPendulumsSound().first
                                         val sound = it.getBigBallsPendulumsSound().second
-                                        sound.play(id, 0.86f, freq)
+                                        sound.play(id, 0.88f, freq)
                                     }
                                 })
                             },

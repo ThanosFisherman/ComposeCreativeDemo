@@ -55,7 +55,7 @@ fun main() {
                         }
                     },
                     Demo("Pendulums") {
-                        LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic(), volume = 0.6f) }
+                        LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic(), volume = 0.5f) }
                         PendulumsDemo(onCrossedCenterSmall = { freq ->
                             val id = audioManager.getPendulumsSound().first
                             val sound = audioManager.getPendulumsSound().second
@@ -63,7 +63,7 @@ fun main() {
                         }, onCrossedCenterBig = { freq ->
                             val id = audioManager.getBigBallsPendulumsSound().first
                             val sound = audioManager.getBigBallsPendulumsSound().second
-                            sound.play(id, 0.86f, freq)
+                            sound.play(id, 0.88f, freq)
                         })
                     },
                     Demo("The balls of Fury") {
