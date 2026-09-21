@@ -17,7 +17,7 @@ fun generateStars(size: Size, count: Int = 100, seed: Long = 1132L): List<Star> 
                 y = random.nextFloat() * size.height,
             ),
             sizePx = random.nextFloat() * (1.5f - 0.5f) + 0.5f, // [0.5..1.5]
-            alpha = random.nextFloat() * 0.5f + 0.3f,  // 0.3..0.8
+            alpha = random.nextFloat() * 0.6f + 0.3f,  // 0.3..0.9
         )
     }
 }

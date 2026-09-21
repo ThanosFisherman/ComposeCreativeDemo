@@ -19,8 +19,6 @@ object SwarmConfig {
     const val FILLED_BALL_PROBABILITY = 0.55f  // rest render as outline-only rings, matching the reference image's mix
     const val PULSE_DECAY_PER_SEC = 5f         // same fade rate as the other demos' post-bounce flash
     const val PULSE_FLASH_THRESHOLD = 0.02f    // below this, skip the glow gradient entirely — see drawSwarmBall
-    const val STAR_COUNT = 100
-    const val STAR_SEED = 1L
 
     val BOUNDARY_COLOR = Color.White.copy(alpha = 0.7f)// ---------- Virtual viewport ----------
 }

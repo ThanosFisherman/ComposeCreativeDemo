@@ -18,8 +18,6 @@ import io.github.thanosfisherman.demo.drawStars
 import io.github.thanosfisherman.demo.generateStars
 import io.github.thanosfisherman.demo.rememberGameLoopState
 import io.github.thanosfisherman.demo.swarm.SwarmConfig.DEFAULT_BALL_COUNT
-import io.github.thanosfisherman.demo.swarm.SwarmConfig.STAR_COUNT
-import io.github.thanosfisherman.demo.swarm.SwarmConfig.STAR_SEED
 import io.github.thanosfisherman.demo.swarm.SwarmConfig.VIRTUAL_SIZE
 import kotlin.math.min
 
@@ -36,7 +34,7 @@ fun SwarmDemo(
     val gameLoopState = rememberGameLoopState()
 
     // Stars are generated from the LIVE canvas size, not the fixed virtual one
-    val stars = remember(canvasSize) { generateStars(canvasSize, STAR_COUNT, STAR_SEED) }
+    val stars = remember(canvasSize) { generateStars(canvasSize, 200) }
 
     LaunchedEffect(ballCount) {
         scene = buildSwarmScene(VIRTUAL_SIZE, ballCount)

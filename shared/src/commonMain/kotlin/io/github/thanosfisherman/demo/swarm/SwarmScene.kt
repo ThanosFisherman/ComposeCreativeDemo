@@ -10,9 +10,9 @@ import io.github.thanosfisherman.demo.swarm.SwarmConfig.BOUNDARY_RADIUS_FRACTION
 import io.github.thanosfisherman.demo.swarm.SwarmConfig.FILLED_BALL_PROBABILITY
 import io.github.thanosfisherman.demo.swarm.SwarmConfig.SPEED_MAX
 import io.github.thanosfisherman.demo.swarm.SwarmConfig.SPEED_MIN
-import io.github.thanosfisherman.demo.swarm.SwarmConfig.STAR_SEED
 import kotlin.math.*
 import kotlin.random.Random
+import kotlin.time.Clock
 
 class SwarmScene(
     val center: Offset,
@@ -25,7 +25,8 @@ fun buildSwarmScene(size: Size, ballCount: Int): SwarmScene {
     val center = Offset(size.width / 2f, size.height / 2f)
     val boundaryRadius = min(size.width, size.height) * BOUNDARY_RADIUS_FRACTION
 
-    val random = Random(STAR_SEED) // reuse the same fixed seed as the star field, for a reproducible layout
+    val seed = Clock.System.now().toEpochMilliseconds()
+    val random = Random(seed)
     val notes = MusicIntervals.MAJOR_ADD_2_ARPEGGIO
 
     val balls = List(count) { i ->
