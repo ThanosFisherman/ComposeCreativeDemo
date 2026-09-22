@@ -39,8 +39,8 @@ fun DemoNavigator(demos: List<Demo>) {
             }
             Spacer(modifier = Modifier.weight(1f))
             Button(
-                onClick = { if (index < demos.lastIndex) index++ },
-                enabled = index < demos.lastIndex,
+                onClick = { index = (index + 1) % demos.size },
+                enabled = true,
                 modifier = Modifier
                     .weight(1f)
                     .align(Alignment.CenterVertically),
