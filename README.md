@@ -6,6 +6,12 @@ Try the WebAssembly version [here](https://thanosfisherman.github.io/ComposeCrea
 
 A little **Kotlin-Compose Multiplatform** playground featuring a growing set of creative-coding demos built around **balls**, **motion**, and **audio**.
 
+### Swarm
+
+- A swarm of small balls drifts freely inside a plain, unfilled boundary circle.
+- It features Per-frame collision detection: every frame checks each ball's distance from the boundary and reflects its velocity by bouncing off the boundary.
+- A sound plays each time a bounce occurs. The sounds alternate between the I-IV (minor 6th)-V progression.
+
 ### Pendulums
 
 - The **small pendulums** swing together from the **same shared angle**. The **big** ones swing **independently**, each with its own **thread length**.
