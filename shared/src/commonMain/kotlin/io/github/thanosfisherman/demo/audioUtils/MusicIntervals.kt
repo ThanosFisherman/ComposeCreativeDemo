@@ -391,6 +391,7 @@ object MusicIntervals {
         MAJOR_THIRD_2,
     )
 
+    // [0.5, 0.561231, 0.62996054, 0.74915355, 1.0, 1.122462, 1.2599211, 1.4983071, 2.0]
     val MAJOR_ADD_2_ARPEGGIO: FloatArray = floatArrayOf(
         OCTAVE_0,
         MINOR_SEVENTH_0,
@@ -403,10 +404,21 @@ object MusicIntervals {
         OCTAVE_1
     )
 
-    val MINOR_ADD_2_6_ARPEGGIO: FloatArray = floatArrayOf(
-        OCTAVE_0,
-        MINOR_SEVENTH_0,
-        MAJOR_SIXTH_0,
+    // (-5) [0.5612311, 0.74915355, 0.8408964, 0.94387436, 1.1224622, 1.4983071, 1.6817929, 1.8877487, 2.2449243]
+    val MAJOR_ADD_2_ARPEGGIO_INV: FloatArray = floatArrayOf(
+        PERFECT_FOURTH_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MAJOR_THIRD_1,
+        PERFECT_FIFTH_1,
+        OCTAVE_1,
+        MAJOR_SECOND_2,
+        MAJOR_THIRD_2,
+        PERFECT_FIFTH_2,
+    )
+
+    // (-7) [0.5, 0.561231, 0.6674199, 0.7491535, 0.79370046, 1.0, 1.122462, 1.3348398, 1.498307, 1.5874009, 2.0]
+    val MINOR_ADD_2_6_ARPEGGIO_INV: FloatArray = floatArrayOf(
         PERFECT_FOURTH_0,
         MINOR_THIRD_0,
         UNISON,
@@ -414,7 +426,10 @@ object MusicIntervals {
         MINOR_THIRD_1,
         PERFECT_FIFTH_1,
         MAJOR_SIXTH_1,
-        OCTAVE_1
+        OCTAVE_1,
+        MAJOR_SECOND_2,
+        MINOR_THIRD_2,
+        PERFECT_FIFTH_2,
     )
 
     val WHOLE_TONE_SCALE: FloatArray = floatArrayOf(

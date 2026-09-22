@@ -39,13 +39,13 @@ class SwarmSim(val size: Size, val swarmScene: SwarmScene?) {
 
                     1 -> {
                         scaleLabel = "MINOR ADD 2,6 ARPEGGIO IV"
-                        MusicIntervals.MINOR_ADD_2_6_ARPEGGIO.map { MusicIntervals.frequencyMultiplier(-7) * it }
+                        MusicIntervals.MINOR_ADD_2_6_ARPEGGIO_INV.map { MusicIntervals.frequencyMultiplier(-7) * it }
                             .toFloatArray()
                     }
 
                     else -> {
                         scaleLabel = "MAJOR ADD 2 ARPEGGIO V"
-                        MusicIntervals.MAJOR_ADD_2_ARPEGGIO.map { MusicIntervals.frequencyMultiplier(-5) * it }
+                        MusicIntervals.MAJOR_ADD_2_ARPEGGIO_INV.map { MusicIntervals.frequencyMultiplier(-5) * it }
                             .toFloatArray()
                     }
                 }
