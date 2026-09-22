@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
                                     audioManager?.let {
                                         val id = it.getPendulumsSound().first
                                         val sound = it.getPendulumsSound().second
-                                        sound.play(id, 0.68f, freq)
+                                        sound.play(id, 0.63f, freq)
                                     }
                                 }, onCrossedCenterBig = { freq ->
                                     audioManager?.let {

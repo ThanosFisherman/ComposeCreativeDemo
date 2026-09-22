@@ -66,7 +66,7 @@ fun main() = application {
                             LaunchedEffect(Unit) {
                                 audioManager.allMusic.forEach { it.stop() }
                             }
-                            SwarmDemo {freq->
+                            SwarmDemo { freq ->
                                 val id = audioManager.getSwarmSound().first
                                 val sound = audioManager.getSwarmSound().second
                                 sound.play(id, 0.62f, freq)
@@ -79,7 +79,7 @@ fun main() = application {
                             PendulumsDemo(onCrossedCenterSmall = { freq ->
                                 val id = audioManager.getPendulumsSound().first
                                 val sound = audioManager.getPendulumsSound().second
-                                sound.play(id, 0.68f, freq)
+                                sound.play(id, 0.63f, freq)
                             }, onCrossedCenterBig = { freq ->
                                 val id = audioManager.getBigBallsPendulumsSound().first
                                 val sound = audioManager.getBigBallsPendulumsSound().second

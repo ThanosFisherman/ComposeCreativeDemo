@@ -59,7 +59,7 @@ fun main() {
                         PendulumsDemo(onCrossedCenterSmall = { freq ->
                             val id = audioManager.getPendulumsSound().first
                             val sound = audioManager.getPendulumsSound().second
-                            sound.play(id, 0.68f, freq)
+                            sound.play(id, 0.63f, freq)
                         }, onCrossedCenterBig = { freq ->
                             val id = audioManager.getBigBallsPendulumsSound().first
                             val sound = audioManager.getBigBallsPendulumsSound().second
