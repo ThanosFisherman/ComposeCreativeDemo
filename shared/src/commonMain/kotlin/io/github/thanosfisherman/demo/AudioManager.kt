@@ -12,7 +12,7 @@ interface AudioManager : Disposable {
     val pendulumsToneUri: String
         get() = Res.getUri("files/sounds/vib2.wav")
     val bassToneUri: String
-        get() = Res.getUri("files/sounds/bass_tone.wav")
+        get() = Res.getUri("files/sounds/bass.wav")
     val swarmToneUri: String
         get() = Res.getUri("files/sounds/bells.wav")
     val bouncingBallsMusicUri: String
