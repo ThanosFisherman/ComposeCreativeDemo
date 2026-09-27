@@ -1,6 +1,5 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.audioUtils
 
-import io.github.thanosfisherman.demo.audioUtils.Music
 import kotlinx.coroutines.*
 import org.lwjgl.openal.AL10.*
 import org.lwjgl.stb.STBVorbis.*

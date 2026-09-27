@@ -1,4 +1,4 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.audioUtils
 
 
 @OptIn(ExperimentalWasmJsInterop::class)

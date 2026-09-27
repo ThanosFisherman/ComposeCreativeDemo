@@ -1,11 +1,10 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.audioUtils
 
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.HandlerThread
-import io.github.thanosfisherman.demo.audioUtils.Music
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MusicPlayer(private val context: Context) : Music {

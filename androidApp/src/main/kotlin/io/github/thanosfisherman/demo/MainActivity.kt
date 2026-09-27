@@ -23,7 +23,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.thanosfisherman.demo.audioUtils.Music
+import io.github.thanosfisherman.demo.audioUtils.AudioManager
+import io.github.thanosfisherman.demo.audioUtils.MusicTrack
+import io.github.thanosfisherman.demo.audioUtils.SoundTrack
+import io.github.thanosfisherman.demo.audioUtils.getAudioManager
+import io.github.thanosfisherman.demo.audioUtils.initializeAudioManager
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 import io.github.thanosfisherman.demo.swarm.SwarmDemo
@@ -43,17 +47,12 @@ class MainActivity : ComponentActivity() {
 
             var started by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
-                audioManager?.init()
-            }
-
-            fun playOnly(active: Music?, loop: Boolean = true, volume: Float = 0.8f) {
-                audioManager?.allMusic?.forEach { track -> if (track !== active) track.stop() }
-                active?.play(loop = loop, volume = volume)
+                audioManager.init()
             }
 
             DisposableEffect(Unit) {
                 onDispose {
-                    audioManager?.dispose()
+                    audioManager.dispose()
                 }
             }
 
@@ -67,38 +66,28 @@ class MainActivity : ComponentActivity() {
                         demos = listOf(
                             Demo("Swarm") {
                                 LaunchedEffect(Unit) {
-                                    audioManager.allMusic.forEach { it.stop() }
+                                    audioManager.stopAllMusic()
                                 }
                                 SwarmDemo { freq ->
-                                    val id = audioManager.getSwarmSound().first
-                                    val sound = audioManager.getSwarmSound().second
-                                    sound.play(id, 0.62f, freq)
+                                    audioManager.playSound(SoundTrack.Swarm, 0.62f, freq)
                                 }
                             },
                             Demo("Pendulums") {
-                                LaunchedEffect(Unit) { playOnly(audioManager?.getPendulumsMusic(), volume = 0.5f) }
+                                LaunchedEffect(Unit) {
+                                    audioManager.playMusic(MusicTrack.Pendulums, volume = 0.5f)
+                                }
                                 PendulumsDemo(onCrossedCenterSmall = { freq ->
-                                    audioManager?.let {
-                                        val id = it.getPendulumsSound().first
-                                        val sound = it.getPendulumsSound().second
-                                        sound.play(id, 0.60f, freq)
-                                    }
+                                    audioManager.playSound(SoundTrack.Pendulums, 0.60f, freq)
                                 }, onCrossedCenterBig = { freq ->
-                                    audioManager?.let {
-                                        val id = it.getBigBallsPendulumsSound().first
-                                        val sound = it.getBigBallsPendulumsSound().second
-                                        sound.play(id, 0.89f, freq)
-                                    }
+                                    audioManager.playSound(SoundTrack.Bass, 0.89f, freq)
                                 })
                             },
                             Demo("The balls of Fury") {
-                                LaunchedEffect(Unit) { playOnly(audioManager?.getBouncingBallsMusic()) }
+                                LaunchedEffect(Unit) {
+                                    audioManager.playMusic(MusicTrack.BouncingBalls)
+                                }
                                 BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                                    audioManager?.let {
-                                        val id = it.getBouncingBallsSound().first
-                                        val sound = it.getBouncingBallsSound().second
-                                        sound.play(id, 0.42f, freq)
-                                    }
+                                    audioManager.playSound(SoundTrack.BouncingBalls, 0.42f, freq)
                                 })
                             }
                         )
@@ -111,7 +100,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d("MainActivity", "onDestroy")
-        audioManager?.dispose()
+        audioManager.dispose()
     }
 }
 

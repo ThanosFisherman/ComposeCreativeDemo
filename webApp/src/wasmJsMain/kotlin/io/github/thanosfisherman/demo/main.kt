@@ -17,7 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.ComposeViewport
-import io.github.thanosfisherman.demo.audioUtils.Music
+import io.github.thanosfisherman.demo.audioUtils.MusicTrack
+import io.github.thanosfisherman.demo.audioUtils.SoundTrack
+import io.github.thanosfisherman.demo.audioUtils.getAudioManager
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 import io.github.thanosfisherman.demo.swarm.SwarmDemo
@@ -30,11 +32,6 @@ fun main() {
 
     val audioManager = getAudioManager().also { it.init() }
 
-    fun playOnly(active: Music, loop: Boolean = true, volume: Float = 0.8f) {
-        audioManager.allMusic.forEach { track -> if (track !== active) track.stop() }
-        active.play(loop = loop, volume = volume)
-    }
-
     ComposeViewport(document.body!!) {
         var started by remember { mutableStateOf(false) }
         if (!started) {
@@ -46,32 +43,28 @@ fun main() {
                 demos = listOf(
                     Demo("Swarm") {
                         LaunchedEffect(Unit) {
-                            audioManager.allMusic.forEach { it.stop() }
+                            audioManager.stopAllMusic()
                         }
                         SwarmDemo { freq ->
-                            val id = audioManager.getSwarmSound().first
-                            val sound = audioManager.getSwarmSound().second
-                            sound.play(id, 0.62f, freq)
+                            audioManager.playSound(SoundTrack.Swarm, 0.62f, freq)
                         }
                     },
                     Demo("Pendulums") {
-                        LaunchedEffect(Unit) { playOnly(audioManager.getPendulumsMusic(), volume = 0.5f) }
+                        LaunchedEffect(Unit) {
+                            audioManager.playMusic(MusicTrack.Pendulums, volume = 0.5f)
+                        }
                         PendulumsDemo(onCrossedCenterSmall = { freq ->
-                            val id = audioManager.getPendulumsSound().first
-                            val sound = audioManager.getPendulumsSound().second
-                            sound.play(id, 0.60f, freq)
+                            audioManager.playSound(SoundTrack.Pendulums, 0.60f, freq)
                         }, onCrossedCenterBig = { freq ->
-                            val id = audioManager.getBigBallsPendulumsSound().first
-                            val sound = audioManager.getBigBallsPendulumsSound().second
-                            sound.play(id, 0.89f, freq)
+                            audioManager.playSound(SoundTrack.Bass, 0.89f, freq)
                         })
                     },
                     Demo("The balls of Fury") {
-                        LaunchedEffect(Unit) { playOnly(audioManager.getBouncingBallsMusic()) }
+                        LaunchedEffect(Unit) {
+                            audioManager.playMusic(MusicTrack.BouncingBalls)
+                        }
                         BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
-                            val id = audioManager.getBouncingBallsSound().first
-                            val sound = audioManager.getBouncingBallsSound().second
-                            sound.play(id, 0.42f, freq)
+                            audioManager.playSound(SoundTrack.BouncingBalls, 0.42f, freq)
                         })
                     }
                 )

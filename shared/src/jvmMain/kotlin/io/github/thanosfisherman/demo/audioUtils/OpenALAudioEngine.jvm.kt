@@ -1,4 +1,4 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.audioUtils
 
 import org.lwjgl.openal.AL
 import org.lwjgl.openal.ALC

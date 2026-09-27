@@ -1,6 +1,4 @@
-package io.github.thanosfisherman.demo
-
-import io.github.thanosfisherman.demo.audioUtils.Music
+package io.github.thanosfisherman.demo.audioUtils
 
 @OptIn(ExperimentalWasmJsInterop::class)
 class MusicPlayer : Music {

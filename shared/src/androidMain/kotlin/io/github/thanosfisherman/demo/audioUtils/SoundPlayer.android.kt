@@ -1,7 +1,6 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.audioUtils
 
 import android.content.Context
-import io.github.thanosfisherman.demo.audioUtils.Sound
 import java.util.concurrent.atomic.AtomicBoolean
 
 class SoundPlayer(private val context: Context) : Sound {

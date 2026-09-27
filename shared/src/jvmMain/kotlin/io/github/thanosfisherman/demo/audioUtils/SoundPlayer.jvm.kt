@@ -1,6 +1,5 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.audioUtils
 
-import io.github.thanosfisherman.demo.audioUtils.Sound
 import org.lwjgl.openal.AL10.*
 import org.lwjgl.system.MemoryUtil
 import java.io.BufferedInputStream

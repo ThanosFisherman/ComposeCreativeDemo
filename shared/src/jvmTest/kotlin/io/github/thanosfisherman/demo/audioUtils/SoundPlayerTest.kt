@@ -1,4 +1,4 @@
-package io.github.thanosfisherman.demo
+package io.github.thanosfisherman.demo.audioUtils
 
 import java.io.BufferedInputStream
 import java.net.URI
@@ -9,19 +9,19 @@ import kotlin.test.assertTrue
 class SoundPlayerTest {
     @Test
     fun testResourceStream() {
-        val resourcePath = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/bass_tone.wav"
+        val resourcePath = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/bass.wav"
         val stream = SoundPlayer::class.java.classLoader.getResourceAsStream(resourcePath)
         assertTrue(stream != null, "Stream should not be null")
         val audioIn = AudioSystem.getAudioInputStream(BufferedInputStream(stream))
         val format = audioIn.format
         val data = audioIn.readAllBytes()
-        println("[DEBUG_LOG] bass_tone format=$format, bytes=${data.size}, durationSec=${data.size.toDouble() / (format.sampleRate * format.frameSize)}")
+        println("[DEBUG_LOG] bass format=$format, bytes=${data.size}, durationSec=${data.size.toDouble() / (format.sampleRate * format.frameSize)}")
         assertTrue(data.isNotEmpty(), "Audio data should not be empty")
     }
 
     @Test
     fun testResourceUrlStream() {
-        val resourcePath = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/tone3.wav"
+        val resourcePath = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/vib1.wav"
         val url = SoundPlayer::class.java.classLoader.getResource(resourcePath)
         assertTrue(url != null, "URL should not be null")
         val uriString = url.toURI().toString()
@@ -39,8 +39,8 @@ class SoundPlayerTest {
         p1.init()
         p2.init()
         p3.init()
-        val uriBass = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/bass_tone.wav"
-        val uriTone = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/tone2.wav"
+        val uriBass = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/bass.wav"
+        val uriTone = "composeResources/composecreativedemo.shared.generated.resources/files/sounds/vib1.wav"
         val id1 = p1.loadSound(uriTone)
         val id3 = p3.loadSound(uriBass)
         println("[DEBUG_LOG] id1=$id1, id3=$id3")
