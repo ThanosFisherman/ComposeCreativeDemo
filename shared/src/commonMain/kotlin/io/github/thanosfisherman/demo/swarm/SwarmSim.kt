@@ -27,7 +27,7 @@ class SwarmSim(val size: Size, val swarmScene: SwarmScene?) {
     fun update(dt: Float, onBounce: (Float) -> Unit) {
         swarmScene?.let { scene ->
             timer += dt
-            val scaleIndex = (timer / 6f).toInt() % 2
+            val scaleIndex = (timer / 4f).toInt() % 2
             if (scaleIndex != currentScaleIndex) {
                 currentScaleIndex = scaleIndex
                 val rand = (0..2).random()
