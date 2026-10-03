@@ -106,7 +106,7 @@ private fun DrawScope.drawBall(bouncingBall: BouncingBall) {
 @Composable
 fun BouncingBallsInVGame(
     modifier: Modifier = Modifier,
-    ballCount: Int = 10,
+    ballCount: Int = 15,
     onBounce: (freq: Float) -> Unit = {},
 ) {
     var isPortrait by remember { mutableStateOf(false) }
@@ -157,7 +157,7 @@ fun BouncingBallsInVGame(
                     }
 
                     // 2. Speed updates (every 15 seconds)
-                    val speedIndex = (timer / 15f).toInt() % 3
+                    val speedIndex = (timer / 16f).toInt() % 3
                     if (speedIndex != currentSpeedIndex) {
                         currentSpeedIndex = speedIndex
                         BouncingBallsConfig.ANGULAR_SPEED_DEG_PER_SEC = when (speedIndex) {

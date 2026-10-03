@@ -10,7 +10,7 @@ object BouncingBallsConfig {
 
     // ---------- Tuning ----------
     const val PARTICLE_RADIUS = 12f
-    var ANGULAR_SPEED_DEG_PER_SEC = 160f // matches the original: a full 0->180 sweep in ~1s at speed 1.0
+    var ANGULAR_SPEED_DEG_PER_SEC = 120f // full 0->180 sweep in ~1s at speed 1.0
     const val SPEED_MODIFIER_MAX = 1f          // ball 0 (top row) sweeps fastest
     const val SPEED_MODIFIER_MIN = 0.75f       // last ball (bottom row) sweeps slowest
     const val MAX_DT = 1f / 30f                // clamp so a hitch doesn't blow up the sim

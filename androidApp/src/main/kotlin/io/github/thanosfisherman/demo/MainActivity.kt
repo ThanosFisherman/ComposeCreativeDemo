@@ -23,11 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.thanosfisherman.demo.audioUtils.AudioManager
-import io.github.thanosfisherman.demo.audioUtils.MusicTrack
-import io.github.thanosfisherman.demo.audioUtils.SoundTrack
-import io.github.thanosfisherman.demo.audioUtils.getAudioManager
-import io.github.thanosfisherman.demo.audioUtils.initializeAudioManager
+import io.github.thanosfisherman.demo.audioUtils.*
 import io.github.thanosfisherman.demo.ballsoffury.BouncingBallsInVGame
 import io.github.thanosfisherman.demo.pendulums.PendulumsDemo
 import io.github.thanosfisherman.demo.swarm.SwarmDemo
@@ -86,7 +82,7 @@ class MainActivity : ComponentActivity() {
                                 LaunchedEffect(Unit) {
                                     audioManager.playMusic(MusicTrack.BouncingBalls)
                                 }
-                                BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
+                                BouncingBallsInVGame(onBounce = { freq ->
                                     audioManager.playSound(SoundTrack.BouncingBalls, 0.42f, freq)
                                 })
                             }

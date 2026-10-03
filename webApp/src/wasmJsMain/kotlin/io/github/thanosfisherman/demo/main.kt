@@ -63,7 +63,7 @@ fun main() {
                         LaunchedEffect(Unit) {
                             audioManager.playMusic(MusicTrack.BouncingBalls)
                         }
-                        BouncingBallsInVGame(ballCount = 14, onBounce = { freq ->
+                        BouncingBallsInVGame(onBounce = { freq ->
                             audioManager.playSound(SoundTrack.BouncingBalls, 0.42f, freq)
                         })
                     }
