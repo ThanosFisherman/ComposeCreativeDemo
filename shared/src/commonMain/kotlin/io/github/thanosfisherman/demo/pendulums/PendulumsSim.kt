@@ -25,6 +25,8 @@ import io.github.thanosfisherman.demo.toRadians
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
+import kotlin.random.Random
+import kotlin.time.Clock
 
 class PendulumsSim(val scene: PendulumScene?) {
 
@@ -32,6 +34,7 @@ class PendulumsSim(val scene: PendulumScene?) {
     var currentScaleIndex = -1
     var scaleLabel: String by mutableStateOf("")
         private set
+    private val random = Random(Clock.System.now().toEpochMilliseconds())
 
     private fun updateBall(
         ball: PendulumBall,
@@ -77,8 +80,13 @@ class PendulumsSim(val scene: PendulumScene?) {
                 currentScaleIndex = scaleIndex
                 val scale = when (scaleIndex) {
                     0 -> {
-                        scaleLabel = "MAJOR PENTATONIC"
-                        MusicIntervals.MAJOR_PENTATONIC_SCALE
+                        if (timer > 32f && random.nextFloat() > 0.45f) {
+                            scaleLabel = "LYDIAN PENTATONIC"
+                            MusicIntervals.LYDIAN_PENTATONIC_SCALE
+                        } else {
+                            scaleLabel = "MAJOR PENTATONIC"
+                            MusicIntervals.MAJOR_PENTATONIC_SCALE
+                        }
                     }
 
                     else -> {

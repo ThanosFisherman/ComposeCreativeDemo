@@ -225,6 +225,38 @@ object MusicIntervals {
         OCTAVE_1
     )
 
+    val LYDIAN_PENTATONIC_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MINOR_SIXTH_0,
+        TRITONE_0,
+        PERFECT_FOURTH_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MAJOR_THIRD_1,
+        TRITONE_1,
+        PERFECT_FIFTH_1,
+        OCTAVE_1,
+    )
+
+    val LYDIAN_SCALE = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MINOR_SIXTH_0,
+        TRITONE_0,
+        PERFECT_FOURTH_0,
+        MINOR_THIRD_0,
+        MINOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MAJOR_THIRD_1,
+        TRITONE_1,
+        PERFECT_FIFTH_1,
+        MAJOR_SIXTH_1,
+        MAJOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
     val DOUBLE_HARMONIC_MAJOR = floatArrayOf(
         OCTAVE_0,
         MAJOR_SEVENTH_0,
@@ -347,6 +379,24 @@ object MusicIntervals {
         OCTAVE_1
     )
 
+    val DORIAN_S4_SCALE: FloatArray = floatArrayOf(
+        OCTAVE_0,
+        MINOR_SEVENTH_0,
+        MAJOR_SIXTH_0,
+        TRITONE_0,
+        PERFECT_FOURTH_0,
+        MINOR_THIRD_0,
+        MAJOR_SECOND_0,
+        UNISON,
+        MAJOR_SECOND_1,
+        MINOR_THIRD_1,
+        TRITONE_1,
+        PERFECT_FIFTH_1,
+        MAJOR_SIXTH_1,
+        MINOR_SEVENTH_1,
+        OCTAVE_1
+    )
+
     val HIRAJOSHI_SCALE = floatArrayOf(
         OCTAVE_0,
         MINOR_SEVENTH_0,
@@ -463,11 +513,12 @@ object MusicIntervals {
         MINOR_SEVENTH_1,
         OCTAVE_1
     )
-    val ONE_FOUR_FIVE: FloatArray = floatArrayOf(
+
+    val SUS_2_ARPEGGIO: FloatArray = floatArrayOf(
         OCTAVE_0,
         PERFECT_FOURTH_0,
         UNISON,
-        PERFECT_FOURTH_1,
+        MAJOR_SECOND_1,
         PERFECT_FIFTH_1,
         OCTAVE_1
     )
