@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import io.github.thanosfisherman.demo.audioUtils.MusicTrack
 import io.github.thanosfisherman.demo.audioUtils.SoundTrack
 import io.github.thanosfisherman.demo.audioUtils.getAudioManager
@@ -34,12 +35,14 @@ fun main() = application {
 
 
     val audioManager = remember { getAudioManager() }
+    val windowState = rememberWindowState(width = 1280.dp, height = 800.dp)
 
     LaunchedEffect(Unit) {
         audioManager.init()
     }
 
     Window(
+        state = windowState,
         onCloseRequest = { audioManager.dispose(); exitApplication() },
         title = "Balls of fury",
         onKeyEvent = { event ->
