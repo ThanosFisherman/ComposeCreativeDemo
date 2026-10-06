@@ -106,7 +106,7 @@ private fun DrawScope.drawBall(bouncingBall: BouncingBall) {
 @Composable
 fun BouncingBallsInVGame(
     modifier: Modifier = Modifier,
-    ballCount: Int = 15,
+    ballCount: Int = 14,
     onBounce: (freq: Float) -> Unit = {},
 ) {
     var isPortrait by remember { mutableStateOf(false) }

@@ -237,6 +237,8 @@ object MusicIntervals {
         TRITONE_1,
         PERFECT_FIFTH_1,
         OCTAVE_1,
+        MAJOR_SECOND_2,
+        MAJOR_THIRD_2,
     )
 
     val LYDIAN_SCALE = floatArrayOf(
