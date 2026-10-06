@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
                                     audioManager.playMusic(MusicTrack.Pendulums, volume = 0.5f)
                                 }
                                 PendulumsDemo(onCrossedCenterSmall = { freq ->
-                                    audioManager.playSound(SoundTrack.Pendulums, 0.56f, freq)
+                                    audioManager.playSound(SoundTrack.Pendulums, 0.58f, freq)
                                 }, onCrossedCenterBig = { freq ->
                                     audioManager.playSound(SoundTrack.Bass, 0.88f, freq)
                                 })
