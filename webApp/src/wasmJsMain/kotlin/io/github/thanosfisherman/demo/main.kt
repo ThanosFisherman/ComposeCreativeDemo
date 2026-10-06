@@ -54,9 +54,9 @@ fun main() {
                             audioManager.playMusic(MusicTrack.Pendulums, volume = 0.5f)
                         }
                         PendulumsDemo(onCrossedCenterSmall = { freq ->
-                            audioManager.playSound(SoundTrack.Pendulums, 0.60f, freq)
+                            audioManager.playSound(SoundTrack.Pendulums, 0.56f, freq)
                         }, onCrossedCenterBig = { freq ->
-                            audioManager.playSound(SoundTrack.Bass, 0.89f, freq)
+                            audioManager.playSound(SoundTrack.Bass, 0.88f, freq)
                         })
                     },
                     Demo("The balls of Fury") {
